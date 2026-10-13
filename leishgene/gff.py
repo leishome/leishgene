@@ -21,6 +21,8 @@ IGNORED_TYPES = {
 }
 LIST_ATTRS = {"Dbxref": "dbxref", "Ontology_term": "go", "ec_number": "ec", "EC_number": "ec"}
 PRODUCT_ATTRS = ("product", "description")
+#: Attributes already held by a dedicated Gene field; not repeated in ``attrs``.
+FIELD_ATTRS = {"ID", "Parent", "Name", *PRODUCT_ATTRS, *LIST_ATTRS}
 
 
 @dataclass
@@ -115,7 +117,7 @@ def _build(genome: str, row: _Row, members: list) -> Gene:
     gene = Gene(genome, row.seqid, row.start, row.end, row.strand, row.type, ident)
     for member in [row] + members:
         for key, value in member.attrs.items():
-            if key not in ("ID", "Parent"):
+            if key not in FIELD_ATTRS:
                 gene.attrs.setdefault(key, value)
         for key, target in LIST_ATTRS.items():
             for value in member.lists.get(key, []):

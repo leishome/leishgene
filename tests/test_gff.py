@@ -72,3 +72,9 @@ def test_to_dict_keys():
         "dbxref",
         "attrs",
     }
+
+
+def test_attrs_omit_keys_already_in_fields():
+    genes = by_id(parse_gff(FIX / "ncbi.gff", "G1"))
+    attrs = genes["LMJF_01_0010"].attrs
+    assert not {"Name", "product", "description", "Dbxref", "Ontology_term", "ec_number", "EC_number"} & set(attrs)
