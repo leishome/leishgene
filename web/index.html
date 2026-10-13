@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leishgene</title>
+<script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="title"><h1>Leishgene</h1><p>Search genes and annotations across <i>Leishmania</i> genomes</p></div>
+    <nav>
+      <a class="btn" href="https://github.com/leishome/leishgene" target="_blank" rel="noopener">GitHub</a>
+      <button id="theme" type="button" aria-label="Toggle dark mode">Theme</button>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="intro">
+    <p>Words are AND-ed. Use <code>kinas*</code> for globs, <code>/^LdBPK_\d+$/</code> for regular expressions, <code>"protein kinase"</code> for phrases,
+    and <code>field:value</code> with <code>id name product type species genome ec go dbxref</code>.</p>
+  </div>
+  <input id="q" type="search" placeholder="Search genes… (e.g. kinase species:donovani, /^LdBPK_27/, type:tRNA)" autofocus aria-label="Search genes">
+  <div class="bar">
+    <span id="status">Loading index…</span>
+    <label><input id="all" type="checkbox"> Search all annotation fields (downloads every genome)</label>
+  </div>
+  <div id="error" class="err" hidden></div>
+  <table class="dt" id="results" hidden>
+    <thead><tr><th>genome</th><th>species</th><th>location</th><th>strand</th><th>id</th><th>type</th><th>product</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p id="missing" class="notes"></p>
+</main>
+<footer>Generated from the leishref catalog and its GFF annotations.</footer>
+<script type="module" src="search.js"></script>
+</body>
+</html>

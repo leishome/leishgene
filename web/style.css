@@ -1,0 +1,27 @@
+:root { --bg:#fff; --card:#fff; --line:#e6e5e1; --text:#0b0b0b; --text2:#52514e; --muted:#85847f; --accent:#159957; --accent-soft:#e6f5ec; --bad:#b3261e; }
+:root[data-theme="dark"] { --bg:#1a1a19; --card:#222221; --line:#343432; --text:#fff; --text2:#c3c2b7; --muted:#8d8c85; --accent:#2fbf7a; --accent-soft:#1c3329; --bad:#ff8a80; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#1a1a19; --card:#222221; --line:#343432; --text:#fff; --text2:#c3c2b7; --muted:#8d8c85; --accent:#2fbf7a; --accent-soft:#1c3329; --bad:#ff8a80; } }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Open Sans", system-ui, sans-serif; background: var(--bg); color: var(--text2); }
+header { background: linear-gradient(120deg, #155799, #159957); color: #fff; padding: 1rem 1.5rem; }
+.inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.title { flex: 1; min-width: 200px; }
+.title h1 { margin: 0; font-size: 1.8rem; }
+.title p { margin: .1rem 0 0; opacity: .9; font-size: .95rem; }
+nav { display: flex; gap: .5rem; }
+.btn, #theme { color: #fff; background: none; border: 1px solid rgba(255,255,255,.3); border-radius: .3rem; padding: .4rem .9rem; text-decoration: none; cursor: pointer; font: inherit; }
+main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 2rem; }
+a { color: var(--accent); }
+code { color: var(--text); font-size: 13px; background: var(--accent-soft); padding: 1px 4px; border-radius: 4px; }
+.intro { margin-top: 1.5rem; }
+#q { width: 100%; padding: 14px 16px; font-size: 17px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); outline: none; }
+#q:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.bar { display: flex; gap: 16px; align-items: center; margin: 10px 0; font-size: 13px; flex-wrap: wrap; }
+.bar span { flex: 1; }
+.err { color: var(--bad); padding: 8px 0; font-family: ui-monospace, monospace; font-size: 13px; }
+.dt { width: 100%; font-size: 13px; border-collapse: collapse; }
+.dt th, .dt td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.dt th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.dt td.mono { font-family: ui-monospace, monospace; white-space: nowrap; }
+.notes { font-size: 12px; color: var(--muted); }
+footer { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
