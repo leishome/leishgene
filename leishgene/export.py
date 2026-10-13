@@ -22,16 +22,16 @@ def validate_index(index_dir: Path) -> list:
     if not names.is_file():
         raise SiteIndexError(f"{names} is missing: run `leishgene build` again")
     for entry in manifest:
-        if entry["status"] == "ok" and not (index_dir / f"{entry['genome']}.json").is_file():
+        if entry["status"] != "missing" and not (index_dir / f"{entry['genome']}.json").is_file():
             raise SiteIndexError(f"{entry['genome']}: shard {entry['genome']}.json is missing")
     return manifest
 
 
 def export_site(index_dir: Path, site_data_dir: Path) -> None:
-    """Copy manifest, names and the shards of every ok genome into ``site_data_dir``."""
+    """Copy manifest, names and the shards of every genome that has one into ``site_data_dir``."""
     manifest = validate_index(index_dir)
     index_dir, site_data_dir = Path(index_dir), Path(site_data_dir)
     site_data_dir.mkdir(parents=True, exist_ok=True)
-    wanted = ["manifest.json", "names.json"] + [f"{e['genome']}.json" for e in manifest if e["status"] == "ok"]
+    wanted = ["manifest.json", "names.json"] + [f"{e['genome']}.json" for e in manifest if e["status"] != "missing"]
     for name in wanted:
         shutil.copyfile(index_dir / name, site_data_dir / name)

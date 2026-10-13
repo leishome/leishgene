@@ -7,7 +7,7 @@ name: Publish gene search page
 on:
   push:
     branches: [main]
-    paths: ["leishgene/**", "web/**", ".github/workflows/site.yml"]
+    paths: ["leishgene/**", "web/**", "pyproject.toml", ".github/workflows/site.yml"]
   workflow_dispatch:
 
 permissions:
@@ -31,13 +31,18 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install leishgene
-        run: pip install .
+        # leishref is not on PyPI yet: install it from GitHub first
+        run: |
+          pip install "git+https://github.com/leishome/leishref"
+          pip install .
+      - name: Key for the leishref download cache
+        id: genomes
+        run: echo "hash=$(leishgene info --list-gff-genomes | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
       - name: Cache leishref downloads
         uses: actions/cache@v4
         with:
           path: ~/.config/leishref
-          key: leishref-${{ github.run_id }}
-          restore-keys: leishref-
+          key: leishref-${{ steps.genomes.outputs.hash }}
       - name: Install the genomes that have a GFF
         run: |
           for genome in $(leishgene info --list-gff-genomes); do

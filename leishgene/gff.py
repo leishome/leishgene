@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from urllib.parse import unquote
 
-GENE_TYPES = {"gene", "pseudogene", "ncRNA_gene"}
+GENE_TYPES = {"gene", "pseudogene", "ncRNA_gene", "protein_coding_gene"}
 #: Feature rows that never become, or fold into, a searchable record.
 IGNORED_TYPES = {
     "exon",
@@ -18,6 +18,7 @@ IGNORED_TYPES = {
     "contig",
     "supercontig",
     "scaffold",
+    "polypeptide",  # VEuPathDB: linked by Derives_from, nothing to search that the CDS does not hold
 }
 LIST_ATTRS = {"Dbxref": "dbxref", "Ontology_term": "go", "ec_number": "ec", "EC_number": "ec"}
 PRODUCT_ATTRS = ("product", "description")
@@ -99,14 +100,16 @@ def _read_rows(path: Path) -> list:
     return rows
 
 
-def _gene_ancestor(row: _Row, by_id: dict):
-    seen = set()
-    while row.parent and row.parent in by_id and row.parent not in seen:
-        seen.add(row.parent)
-        row = by_id[row.parent]
-        if row.type in GENE_TYPES:
-            return row
-    return None
+def _root(row: _Row, by_id: dict) -> _Row:
+    """Top of the Parent chain: the gene for ordinary rows, the row itself for orphans."""
+    seen = {id(row)}
+    while row.parent and row.parent in by_id:
+        nxt = by_id[row.parent]
+        if id(nxt) in seen:
+            break
+        seen.add(id(nxt))
+        row = nxt
+    return row
 
 
 def _build(genome: str, row: _Row, members: list) -> Gene:
@@ -114,7 +117,9 @@ def _build(genome: str, row: _Row, members: list) -> Gene:
     ident = row.id
     if gene_level and ident.startswith("gene-"):
         ident = ident[len("gene-") :]
-    gene = Gene(genome, row.seqid, row.start, row.end, row.strand, row.type, ident)
+    # discontinuous features repeat the ID on several rows: one record spanning all of them
+    parts = [row] + [m for m in members if m.type == row.type and m.id == row.id]
+    gene = Gene(genome, row.seqid, min(p.start for p in parts), max(p.end for p in parts), row.strand, row.type, ident)
     for member in [row] + members:
         for key, value in member.attrs.items():
             if key not in FIELD_ATTRS:
@@ -130,20 +135,26 @@ def _build(genome: str, row: _Row, members: list) -> Gene:
 
 
 def parse_gff(path: Path, genome: str) -> list:
-    """Parse a (possibly gzipped) GFF3 file into Gene records, in file order."""
+    """Parse a (possibly gzipped) GFF3 file into Gene records, in file order of their top-level rows.
+
+    Rows are grouped under the top of their Parent chain (the gene, or the mRNA/CDS of a gene-less
+    annotation); rows that repeat an ID are merged into the first one.
+    """
     rows = _read_rows(path)
-    by_id = {r.id: r for r in rows if r.id}
-    children: dict = {}
-    orphans = []
+    by_id: dict = {}
     for row in rows:
-        if row.type in GENE_TYPES or row.type in IGNORED_TYPES:
+        if row.id:
+            by_id.setdefault(row.id, row)
+    members: dict = {}
+    roots = []
+    for row in rows:
+        if row.type in IGNORED_TYPES:
             continue
-        ancestor = _gene_ancestor(row, by_id)
-        if ancestor is not None:
-            children.setdefault(id(ancestor), []).append(row)
+        root = _root(row, by_id)
+        if root is not row:
+            members.setdefault(id(root), []).append(row)
+        elif row.id and by_id[row.id] is not row:
+            members.setdefault(id(by_id[row.id]), []).append(row)
         else:
-            orphans.append(row)
-    members = {id(r): children.get(id(r), []) for r in rows if r.type in GENE_TYPES}
-    genes = [_build(genome, r, members[id(r)]) for r in rows if r.type in GENE_TYPES]
-    genes.extend(_build(genome, r, []) for r in orphans)
-    return genes
+            roots.append(row)
+    return [_build(genome, r, members.get(id(r), [])) for r in roots]

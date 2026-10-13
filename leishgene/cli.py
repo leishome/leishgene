@@ -6,6 +6,7 @@ from pathlib import Path
 import rich_click as click
 from rich.console import Console
 from rich.table import Table
+from rich.text import Text
 
 from leishgene.budget import check_budget
 from leishgene.export import SiteIndexError, export_site, load_manifest
@@ -79,9 +80,8 @@ def search(query, index_dir, limit):
     for column in ("genome", "location", "strand", "id", "type", "product"):
         table.add_column(column)
     for g in hits:
-        table.add_row(
-            g["genome"], f"{g['seqid']}:{g['start']}-{g['end']}", g["strand"], g["id"], g["type"], g["product"]
-        )
+        cells = (g["genome"], f"{g['seqid']}:{g['start']}-{g['end']}", g["strand"], g["id"], g["type"], g["product"])
+        table.add_row(*(Text(str(c)) for c in cells))  # Text: product names contain [brackets], not Rich markup
     Console().print(table)
 
 
@@ -99,7 +99,7 @@ def info(index_dir, list_gff_genomes):
     for column in ("genome", "species", "genes", "status"):
         table.add_column(column)
     for e in manifest:
-        table.add_row(e["genome"], e["species"] or "", str(e["genes"]), e["status"])
+        table.add_row(*(Text(c) for c in (e["genome"], e["species"] or "", str(e["genes"]), e["status"])))
     Console().print(table)
 
 

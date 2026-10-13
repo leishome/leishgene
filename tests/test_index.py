@@ -56,5 +56,5 @@ def test_zero_gene_genome_status_ok_count_zero(tmp_path):
     empty = tmp_path / "empty.gff"
     empty.write_text("##gff-version 3\n")
     manifest = build_index(tmp_path / "out", [src("G1", "empty.gff", empty)])
-    assert manifest[0]["status"] == "ok" and manifest[0]["genes"] == 0
+    assert manifest[0]["status"] == "empty" and manifest[0]["genes"] == 0
     assert load(tmp_path / "out" / "G1.json") == []

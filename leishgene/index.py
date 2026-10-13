@@ -20,7 +20,7 @@ def build_index(out_dir: Path, sources: list, strict: bool = False) -> list:
     """Write ``<genome>.json`` shards, ``manifest.json`` and ``names.json`` into ``out_dir``.
 
     Returns the manifest. A genome whose GFF is not cached is recorded with status "missing"
-    (or raises MissingGffError when ``strict``).
+    (or raises MissingGffError when ``strict``); one with no genes has status "empty".
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -43,6 +43,8 @@ def build_index(out_dir: Path, sources: list, strict: bool = False) -> list:
             continue
         genes = parse_gff(source.gff_path, source.genome_id)
         entry["genes"] = len(genes)
+        if not genes:
+            entry["status"] = "empty"
         _dump(out_dir / f"{source.genome_id}.json", [g.to_dict() for g in genes])
         names.extend([index, g.id, g.name, g.product] for g in genes)
         manifest.append(entry)

@@ -21,7 +21,10 @@ jobs:
         with:
           node-version: "22"
       - name: Install
-        run: pip install -e ".[dev]"
+        # leishref is not on PyPI yet: install it from GitHub first, then leishgene
+        run: |
+          pip install "git+https://github.com/leishome/leishref"
+          pip install -e ".[dev]"
       - name: Lint
         run: |
           black --check leishgene tests

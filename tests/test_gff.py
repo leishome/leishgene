@@ -78,3 +78,43 @@ def test_attrs_omit_keys_already_in_fields():
     genes = by_id(parse_gff(FIX / "ncbi.gff", "G1"))
     attrs = genes["LMJF_01_0010"].attrs
     assert not {"Name", "product", "description", "Dbxref", "Ontology_term", "ec_number", "EC_number"} & set(attrs)
+
+
+def _write(tmp_path, text):
+    path = tmp_path / "t.gff"
+    path.write_text("##gff-version 3\n" + text)
+    return path
+
+
+def test_orphan_mrna_folds_its_cds(tmp_path):
+    path = _write(
+        tmp_path,
+        "c1\tx\tmRNA\t10\t90\t.\t+\t.\tID=rna-XM_1;product=kinase\n"
+        "c1\tx\tCDS\t10\t40\t.\t+\t0\tID=cds-1;Parent=rna-XM_1;Dbxref=GeneID:1\n"
+        "c1\tx\tCDS\t50\t90\t.\t+\t0\tID=cds-1;Parent=rna-XM_1;Dbxref=GeneID:1\n",
+    )
+    (g,) = parse_gff(path, "G")
+    assert g.id == "rna-XM_1" and g.type == "mRNA" and g.dbxref == ["GeneID:1"] and g.product == "kinase"
+
+
+def test_discontinuous_gene_rows_with_same_id_merge(tmp_path):
+    path = _write(
+        tmp_path,
+        "c1\tx\tpseudogene\t482801\t483807\t.\t-\t.\tID=gene-P1;Name=P1\n"
+        "c1\tx\tpseudogene\t481920\t482799\t.\t-\t.\tID=gene-P1;Name=P1\n"
+        "c1\tx\tCDS\t481920\t482799\t.\t-\t0\tID=cds-p1;Parent=gene-P1;product=pseudo kinase\n",
+    )
+    (g,) = parse_gff(path, "G")
+    assert (g.id, g.start, g.end, g.product) == ("P1", 481920, 483807, "pseudo kinase")
+
+
+def test_veupathdb_protein_coding_gene_and_polypeptide(tmp_path):
+    path = _write(
+        tmp_path,
+        "c1\tVEuPathDB\tprotein_coding_gene\t1\t90\t.\t+\t.\tID=LdBPK_1;description=kinesin\n"
+        "c1\tVEuPathDB\tmRNA\t1\t90\t.\t+\t.\tID=LdBPK_1.1;Parent=LdBPK_1\n"
+        "c1\tVEuPathDB\tCDS\t1\t90\t.\t+\t0\tID=cds_LdBPK_1.1;Parent=LdBPK_1.1\n"
+        "c1\tVEuPathDB\tpolypeptide\t1\t90\t.\t+\t.\tID=LdBPK_1.1.p;Derives_from=LdBPK_1.1\n",
+    )
+    (g,) = parse_gff(path, "G")
+    assert g.id == "LdBPK_1" and g.type == "protein_coding_gene" and g.product == "kinesin"

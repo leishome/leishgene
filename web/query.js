@@ -1,6 +1,7 @@
 // Query grammar shared with leishgene/search.py; tests/query_cases.json pins both.
 const FIELDS = ["id", "name", "product", "type", "species", "genome", "ec", "go", "dbxref"];
 const LIST_FIELDS = new Set(["ec", "go", "dbxref"]);
+const SHARD_FIELDS = new Set(["type", "ec", "go", "dbxref"]);
 const BARE_FIELDS = ["id", "name", "product", "ec", "go", "dbxref"];
 const TOKEN = /(?:(\w+):)?(?:"([^"]*)"|\/((?:\\.|[^/\\])*)\/|(\S+))/g;
 
@@ -43,7 +44,11 @@ export function parseQuery(text) {
       quoted = regex = undefined;
       field = undefined;
     }
-    terms.push({ field: field ? field.toLowerCase() : null, pattern: termPattern(quoted, regex, plain) });
+    terms.push({
+      field: field ? field.toLowerCase() : null,
+      raw: plain !== undefined ? plain : quoted !== undefined ? quoted : regex,
+      pattern: termPattern(quoted, regex, plain),
+    });
   }
   return {
     terms,
@@ -51,4 +56,10 @@ export function parseQuery(text) {
       return terms.every(({ field, pattern }) => (field === null ? bareValues(gene) : values(gene, field)).some((v) => pattern.test(v)));
     },
   };
+}
+
+// names.json only holds id/name/product: anything else needs the per-genome shards. A bare term with a colon
+// (GeneID:123, old_locus_tag values) is an annotation ID, which only the shards carry.
+export function needsShards(query, allFields) {
+  return allFields || query.terms.some((t) => (t.field === null ? t.raw.includes(":") : SHARD_FIELDS.has(t.field)));
 }

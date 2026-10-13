@@ -1,12 +1,11 @@
-import { parseQuery, QueryError } from "./query.js";
+import { needsShards, parseQuery, QueryError } from "./query.js";
+import { createShardCache } from "./shards.js";
 
 const $ = (s) => document.querySelector(s);
-const SHARD_FIELDS = new Set(["type", "ec", "go", "dbxref"]);
 const LIMIT = 100;
 
 let manifest = [];
 let names = [];
-const shards = new Map(); // genome index -> gene list
 let run = 0;
 
 async function getJson(url) {
@@ -15,17 +14,14 @@ async function getJson(url) {
   return response.json();
 }
 
-async function loadShard(index) {
-  if (!shards.has(index)) {
-    const entry = manifest[index];
-    const genes = await getJson(`data/${entry.genome}.json`);
-    for (const g of genes) g.species = entry.species || "";
-    shards.set(index, genes);
-  }
-  return shards.get(index);
-}
+const loadShard = createShardCache(async (index) => {
+  const entry = manifest[index];
+  const genes = await getJson(`data/${entry.genome}.json`);
+  for (const g of genes) g.species = entry.species || "";
+  return genes;
+});
 
-function render(rows, total) {
+function render(rows, total, namesOnly) {
   const body = $("#results tbody");
   body.replaceChildren();
   for (const g of rows) {
@@ -48,10 +44,12 @@ function render(rows, total) {
     body.append(tr);
   }
   $("#results").hidden = rows.length === 0;
-  $("#status").textContent = total > rows.length ? `${total} matches, showing ${rows.length}` : `${total} match(es)`;
+  let status = total > rows.length ? `${total} matches, showing ${rows.length}` : `${total} match(es)`;
+  if (total === 0 && namesOnly) status += " in id/name/product; tick 'search all annotation fields' to search EC, GO, Dbxref and attributes";
+  $("#status").textContent = status;
 }
 
-async function onQuery() {
+async function search() {
   const id = ++run;
   const text = $("#q").value;
   const error = $("#error");
@@ -63,6 +61,7 @@ async function onQuery() {
     if (!(e instanceof QueryError)) throw e;
     error.textContent = e.message;
     error.hidden = false;
+    $("#results").hidden = true;
     return;
   }
   if (query.terms.length === 0) {
@@ -70,10 +69,10 @@ async function onQuery() {
     $("#status").textContent = `${names.length} genes in ${manifest.filter((m) => m.status === "ok").length} genomes`;
     return;
   }
-  const needsShards = $("#all").checked || query.terms.some((t) => SHARD_FIELDS.has(t.field));
+  const wantShards = needsShards(query, $("#all").checked);
   let hits = [];
   let total = 0;
-  if (needsShards) {
+  if (wantShards) {
     const ok = manifest.map((m, i) => i).filter((i) => manifest[i].status === "ok");
     let done = 0;
     for (const i of ok) {
@@ -105,10 +104,21 @@ async function onQuery() {
       if (id !== run) return;
     }
     const byId = new Map();
-    for (const gi of needed) for (const g of shards.get(gi)) byId.set(`${gi}\t${g.id}`, g);
+    for (const gi of needed) for (const g of await loadShard(gi)) byId.set(`${gi}\t${g.id}`, g);
     hits = rows.map((r) => byId.get(`${r.gi}\t${r.id}`)).filter(Boolean);
   }
-  if (id === run) render(hits, total);
+  if (id === run) render(hits, total, !wantShards);
+}
+
+async function onQuery() {
+  try {
+    await search();
+  } catch (e) {
+    $("#results").hidden = true;
+    $("#error").textContent = `Search failed: ${e.message}`;
+    $("#error").hidden = false;
+    $("#status").textContent = "";
+  }
 }
 
 async function init() {
@@ -119,7 +129,7 @@ async function init() {
     return;
   }
   const missing = manifest.filter((m) => m.status !== "ok").map((m) => m.genome);
-  $("#missing").textContent = missing.length ? `Not searchable (no GFF available): ${missing.join(", ")}` : "";
+  $("#missing").textContent = missing.length ? `Not searchable (no GFF, or a GFF without genes): ${missing.join(", ")}` : "";
   $("#status").textContent = `${names.length} genes in ${manifest.length - missing.length} genomes`;
   let timer;
   $("#q").addEventListener("input", () => {

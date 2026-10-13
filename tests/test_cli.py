@@ -98,3 +98,32 @@ def test_info_list_gff_genomes_prints_catalog_ids(monkeypatch):
     result = run("info", "--list-gff-genomes")
     assert result.exit_code == 0
     assert result.output.split() == ["A", "B"]
+
+
+def test_search_prints_bracketed_product_literally(tmp_path):
+    out = tmp_path / "idx"
+    out.mkdir()
+    gene = {"genome": "G", "seqid": "c", "start": 1, "end": 2, "strand": "+", "type": "gene", "id": "g1", "name": "g1"}
+    genes = [
+        dict(gene, product="enoyl-[acyl-carrier-protein] reductase"),
+        dict(gene, id="g2", product="bad [/x] markup"),
+    ]
+    (out / "G.json").write_text(json.dumps(genes))
+    (out / "names.json").write_text("[]")
+    (out / "manifest.json").write_text(
+        json.dumps([{"genome": "G", "species": "s", "strain": "", "aliases": [], "genes": 2, "status": "ok"}])
+    )
+    result = CliRunner().invoke(cli, ["search", "g*", "-i", str(out)], env={"COLUMNS": "250"})
+    assert result.exit_code == 0, result.output
+    assert "enoyl-[acyl-carrier-protein] reductase" in result.output
+    assert "bad [/x] markup" in result.output
+
+
+def test_export_ships_shard_of_empty_genome(tmp_path):
+    empty = tmp_path / "e.gff"
+    empty.write_text("##gff-version 3\n")
+    idx = tmp_path / "idx"
+    build_index(idx, [GenomeSource("E", "e.gff", "s", None, [], empty)])
+    result = run("export", "-i", idx, "-o", tmp_path / "site")
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "site" / "E.json").exists()
