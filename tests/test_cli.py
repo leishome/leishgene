@@ -85,3 +85,16 @@ def test_export_fails_over_budget(index_dir, tmp_path, monkeypatch):
     monkeypatch.setattr(cli_module, "check_budget", lambda path: ["G1.json: 9 MB gzipped exceeds 5 MB"])
     result = run("export", "-i", index_dir, "-o", tmp_path / "site")
     assert result.exit_code != 0 and "exceeds" in result.output
+
+
+def test_info_list_gff_genomes_prints_catalog_ids(monkeypatch):
+    import leishgene.cli as cli_module
+
+    monkeypatch.setattr(
+        cli_module,
+        "list_sources",
+        lambda: [GenomeSource("A", "a.gff", None, None, [], None), GenomeSource("B", "b.gff", None, None, [], None)],
+    )
+    result = run("info", "--list-gff-genomes")
+    assert result.exit_code == 0
+    assert result.output.split() == ["A", "B"]

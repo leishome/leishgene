@@ -1,0 +1,54 @@
+name: Publish gene search page
+
+# Builds the gene index from the GFFs of the leishref catalog and publishes web/ with GitHub Pages.
+# Installing the genomes downloads their FASTA as well as the GFF (leishref has no GFF-only install),
+# so the leishref cache is kept between runs.
+
+on:
+  push:
+    branches: [main]
+    paths: ["leishgene/**", "web/**", ".github/workflows/site.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install leishgene
+        run: pip install .
+      - name: Cache leishref downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.config/leishref
+          key: leishref-${{ github.run_id }}
+          restore-keys: leishref-
+      - name: Install the genomes that have a GFF
+        run: |
+          for genome in $(leishgene info --list-gff-genomes); do
+            leishref install "$genome" --alias "$genome" --no-link
+          done
+      - name: Build index
+        run: |
+          leishgene build --strict -i index
+          leishgene export -i index -o web/data
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4

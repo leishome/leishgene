@@ -87,8 +87,13 @@ def search(query, index_dir, limit):
 
 @cli.command()
 @index_option
-def info(index_dir):
+@click.option("--list-gff-genomes", is_flag=True, help="Print the catalog ids of genomes that have a GFF, one per line")
+def info(index_dir, list_gff_genomes):
     """Show the genomes of an index, and those whose GFF was missing."""
+    if list_gff_genomes:
+        for source in list_sources():
+            click.echo(source.genome_id)
+        return
     manifest = _load_manifest(index_dir)
     table = Table()
     for column in ("genome", "species", "genes", "status"):
