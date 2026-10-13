@@ -1,0 +1,4 @@
+##gff-version 3
+LdBPK_01	VEuPathDB	gene	100	900	.	+	.	ID=LdBPK_010010;description=kinesin%2C putative;ebi_biotype=protein_coding
+LdBPK_01	VEuPathDB	mRNA	100	900	.	+	.	ID=LdBPK_010010.1;Parent=LdBPK_010010;description=kinesin%2C putative
+LdBPK_01	VEuPathDB	CDS	100	900	.	+	0	ID=cds_LdBPK_010010.1;Parent=LdBPK_010010.1;Ontology_term=GO:0003777,GO:0005524;ec_number=3.6.4.4

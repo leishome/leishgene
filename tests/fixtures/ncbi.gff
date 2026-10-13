@@ -1,0 +1,13 @@
+##gff-version 3
+chr1	EMBL	gene	3704	4702	.	-	.	ID=gene-LMJF_01_0010;Name=LMJF_01_0010;gbkey=Gene;locus_tag=LMJF_01_0010
+chr1	EMBL	CDS	3704	4702	.	-	0	ID=cds-CBZ11804.1;Parent=gene-LMJF_01_0010;Dbxref=InterPro:IPR021333,UniProtKB/TrEMBL:E9ABZ0;Name=CBZ11804.1;Note=previous protein_id%3DAAC24613.1;product=hypothetical protein
+chr1	EMBL	gene	5000	6000	.	+	.	ID=gene-LMJF_01_0020;Name=LMJF_01_0020
+chr1	EMBL	mRNA	5000	6000	.	+	.	ID=rna-LMJF_01_0020;Parent=gene-LMJF_01_0020;product=protein kinase
+chr1	EMBL	CDS	5000	6000	.	+	0	ID=cds-X1;Parent=rna-LMJF_01_0020;ec_number=2.7.11.1
+chr1	EMBL	gene	7000	7075	.	+	.	ID=gene-LMJF_tRNA1;Name=LMJF_tRNA1
+chr1	EMBL	tRNA	7000	7075	.	+	.	ID=rna-LMJF_tRNA1;Parent=gene-LMJF_tRNA1;product=tRNA-Ala
+chr1	EMBL	exon	7000	7075	.	+	.	ID=exon-1;Parent=rna-LMJF_tRNA1
+chr1	EMBL	region	1	99999	.	+	.	ID=region-1
+##FASTA
+>chr1
+ACGT
