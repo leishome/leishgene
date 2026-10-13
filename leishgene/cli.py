@@ -7,6 +7,7 @@ import rich_click as click
 from rich.console import Console
 from rich.table import Table
 
+from leishgene.budget import check_budget
 from leishgene.export import SiteIndexError, export_site, load_manifest
 from leishgene.index import MissingGffError, build_index
 from leishgene.search import QueryError, parse_query
@@ -107,3 +108,6 @@ def export(index_dir, output):
     except SiteIndexError as exc:
         raise click.ClickException(str(exc))
     click.echo(f"exported -> {output}")
+    problems = check_budget(output)
+    if problems:
+        raise click.ClickException("size budget exceeded:\n" + "\n".join(problems))

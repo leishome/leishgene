@@ -77,3 +77,11 @@ def test_export_rejects_incomplete_index(index_dir, tmp_path):
     (index_dir / "G1.json").unlink()
     result = run("export", "-i", index_dir, "-o", tmp_path / "site")
     assert result.exit_code != 0 and "G1" in result.output
+
+
+def test_export_fails_over_budget(index_dir, tmp_path, monkeypatch):
+    import leishgene.cli as cli_module
+
+    monkeypatch.setattr(cli_module, "check_budget", lambda path: ["G1.json: 9 MB gzipped exceeds 5 MB"])
+    result = run("export", "-i", index_dir, "-o", tmp_path / "site")
+    assert result.exit_code != 0 and "exceeds" in result.output
