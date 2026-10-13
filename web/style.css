@@ -25,3 +25,6 @@ code { color: var(--text); font-size: 13px; background: var(--accent-soft); padd
 .dt td.mono { font-family: ui-monospace, monospace; white-space: nowrap; }
 .notes { font-size: 12px; color: var(--muted); }
 footer { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.bar .actions { flex: 0 0 auto; }
+.export { font: inherit; padding: 2px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--text); cursor: pointer; }
+.export:disabled { opacity: .5; cursor: default; }

@@ -169,3 +169,18 @@ def test_build_without_overrides_file_uses_catalog_only(tmp_path, monkeypatch):
     result = run("build", "-i", tmp_path / "idx")
     assert result.exit_code == 0, result.output
     assert seen["o"] in (None, {})
+
+
+def test_search_output_writes_all_matches_not_just_limit(index_dir, tmp_path):
+    out = tmp_path / "hits.tsv"
+    result = run("search", "*", "-i", index_dir, "--limit", 1, "--output", out)
+    assert result.exit_code == 0, result.output
+    lines = out.read_text().splitlines()
+    assert lines[0].split("\t")[:3] == ["genome", "species", "seqid"]
+    assert len(lines) - 1 > 1  # more rows than --limit
+    assert "wrote" in result.output and str(out) in result.output.replace("\n", "")
+
+
+def test_search_output_rejects_unknown_extension(index_dir, tmp_path):
+    result = run("search", "kinase", "-i", index_dir, "--output", tmp_path / "hits.txt")
+    assert result.exit_code != 0 and ".tsv" in result.output

@@ -13,6 +13,7 @@ from leishgene.export import SiteIndexError, export_site, load_manifest
 from leishgene.index import MissingGffError, build_index
 from leishgene.search import QueryError, parse_query
 from leishgene.sources import list_sources, load_overrides
+from leishgene.table import DELIMITERS, write_table
 
 DEFAULT_INDEX = Path.home() / ".cache" / "leishgene"
 DEFAULT_OVERRIDES = Path("data/extra/gff_overrides.yaml")
@@ -65,7 +66,13 @@ def _load_manifest(index_dir):
 @click.argument("query")
 @index_option
 @click.option("--limit", default=50, show_default=True, help="Maximum rows to print")
-def search(query, index_dir, limit):
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(path_type=Path),
+    help="Also write every match (not only --limit rows) to a .tsv or .csv file",
+)
+def search(query, index_dir, limit, output):
     """Find genes matching QUERY (words are AND-ed; `*` glob, `/regex/`, `field:value`, "phrases")."""
     try:
         parsed = parse_query(query)
@@ -74,8 +81,10 @@ def search(query, index_dir, limit):
     if not parsed.terms:
         click.echo("Empty query: nothing to search.")
         return
+    if output is not None and output.suffix not in DELIMITERS:
+        raise click.UsageError(f"--output must end in .tsv or .csv, not {output.suffix or output.name!r}")
     manifest = _load_manifest(index_dir)
-    hits, total = [], 0
+    hits, total, matched = [], 0, []
     for entry in manifest:
         if entry["status"] != "ok":
             continue
@@ -85,6 +94,8 @@ def search(query, index_dir, limit):
                 total += 1
                 if len(hits) < limit:
                     hits.append(gene)
+                if output is not None:
+                    matched.append(gene)
     table = Table(title=f"{total} match(es)" + (f", showing {limit}" if total > limit else ""))
     for column in ("genome", "location", "strand", "id", "type", "product"):
         table.add_column(column)
@@ -92,6 +103,9 @@ def search(query, index_dir, limit):
         cells = (g["genome"], f"{g['seqid']}:{g['start']}-{g['end']}", g["strand"], g["id"], g["type"], g["product"])
         table.add_row(*(Text(str(c)) for c in cells))  # Text: product names contain [brackets], not Rich markup
     Console().print(table)
+    if output is not None:
+        write_table(matched, output)
+        click.echo(f"wrote {total} row(s) to {output}")
 
 
 @cli.command()

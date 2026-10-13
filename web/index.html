@@ -25,6 +25,7 @@
   <input id="q" type="search" placeholder="Search genes… (e.g. kinase species:donovani, /^LdBPK_27/, type:tRNA)" autofocus aria-label="Search genes">
   <div class="bar">
     <span id="status">Loading index…</span>
+    <span class="actions">Export all matches: <button id="export-tsv" class="export" type="button" disabled>TSV</button> <button id="export-csv" class="export" type="button" disabled>CSV</button></span>
     <label><input id="all" type="checkbox"> Search all annotation fields (downloads every genome)</label>
   </div>
   <div id="error" class="err" hidden></div>
