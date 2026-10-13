@@ -21,7 +21,13 @@ function termPattern(quoted, regex, plain) {
   return new RegExp(text.split("*").map(escapeRe).join(".*"), "i");
 }
 
+// Every name the genome goes by: catalog id, strain, aliases.
+function genomeValues(gene) {
+  return [gene.genome, gene.strain, ...(gene.aliases || [])].filter(Boolean).map(String);
+}
+
 function values(gene, field) {
+  if (field === "genome") return genomeValues(gene);
   const v = gene[field];
   if (v === undefined || v === null) return [];
   return LIST_FIELDS.has(field) ? v.map(String) : [String(v)];
@@ -31,6 +37,7 @@ function bareValues(gene) {
   const out = [];
   for (const f of BARE_FIELDS) out.push(...values(gene, f));
   out.push(...Object.values(gene.attrs || {}).map(String));
+  out.push(...genomeValues(gene), ...values(gene, "species"));
   return out;
 }
 

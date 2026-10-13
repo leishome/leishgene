@@ -80,7 +80,7 @@ def search(query, index_dir, limit):
         if entry["status"] != "ok":
             continue
         for gene in json.loads((Path(index_dir) / f"{entry['genome']}.json").read_text()):
-            gene["species"] = entry["species"] or ""
+            gene.update(species=entry["species"] or "", strain=entry["strain"] or "", aliases=entry["aliases"])
             if parsed.matches(gene):
                 total += 1
                 if len(hits) < limit:

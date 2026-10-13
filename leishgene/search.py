@@ -2,7 +2,8 @@
 
 Terms are separated by whitespace and AND-ed. A term is a case-insensitive substring, a glob
 (``*``), a regular expression (``/re/``) or a quoted phrase (``"two words"``). ``field:term``
-restricts the term to one field; a ``word:`` prefix that is not a known field is part of the term
+restricts the term to one field (``genome:`` also matches the strain and the aliases of the genome;
+bare terms also match the genome and its species); a ``word:`` prefix that is not a known field is part of the term
 (so ``GO:0004672`` and ``GeneID:123`` search the annotation values).
 """
 import re
@@ -33,7 +34,14 @@ def _term_pattern(quoted, regex, plain) -> "re.Pattern":
     return _compile(".*".join(re.escape(part) for part in text.split("*")))
 
 
+def _genome_values(gene: dict) -> list:
+    """Every name the genome goes by: catalog id, strain, aliases."""
+    return [str(v) for v in (gene.get("genome"), gene.get("strain"), *(gene.get("aliases") or [])) if v]
+
+
 def _values(gene: dict, field: str) -> list:
+    if field == "genome":
+        return _genome_values(gene)
     value = gene.get(field)
     if value is None:
         return []
@@ -45,6 +53,8 @@ def _bare_values(gene: dict) -> list:
     for field in BARE_FIELDS:
         out.extend(_values(gene, field))
     out.extend(str(v) for v in (gene.get("attrs") or {}).values())
+    out.extend(_genome_values(gene))
+    out.extend(_values(gene, "species"))
     return out
 
 

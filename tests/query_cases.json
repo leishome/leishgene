@@ -776,5 +776,421 @@
    }
   },
   "match": true
+ },
+ {
+  "query": "genome:Ld1S",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "genome:ld1s kinase",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "genome:pasteur",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "genome:GCA_002243465*",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "genome:Ld2S",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": false
+ },
+ {
+  "query": "Ld1S kinase",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "Ld1S ribosomal",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": false
+ },
+ {
+  "query": "pasteur kinase",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "donovani kinase",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "infantum kinase",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": false
+ },
+ {
+  "query": "GCA_002243465.1 kinase",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "Ld1S",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": true
+ },
+ {
+  "query": "Ld9S",
+  "gene": {
+   "genome": "GCA_002243465.1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "protein kinase, putative",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   },
+   "strain": "pasteur",
+   "aliases": [
+    "Ld1S"
+   ]
+  },
+  "match": false
  }
 ]

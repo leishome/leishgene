@@ -17,7 +17,7 @@ async function getJson(url) {
 const loadShard = createShardCache(async (index) => {
   const entry = manifest[index];
   const genes = await getJson(`data/${entry.genome}.json`);
-  for (const g of genes) g.species = entry.species || "";
+  for (const g of genes) Object.assign(g, { species: entry.species || "", strain: entry.strain || "", aliases: entry.aliases || [] });
   return genes;
 });
 
@@ -91,7 +91,7 @@ async function search() {
     const rows = [];
     for (const [gi, gid, name, product] of names) {
       const entry = manifest[gi];
-      if (query.matches({ genome: entry.genome, species: entry.species || "", id: gid, name, product })) {
+      if (query.matches({ genome: entry.genome, species: entry.species || "", strain: entry.strain || "", aliases: entry.aliases || [], id: gid, name, product })) {
         total++;
         if (rows.length < LIMIT) rows.push({ gi, id: gid, name });
       }

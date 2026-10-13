@@ -13,7 +13,9 @@ Terms are separated by whitespace and AND-ed. Matching is case-insensitive.
 
 Fields: ``id name product type species genome ec go dbxref``. A ``word:`` prefix that is not a field
 (``GO:0004672``, ``GeneID:123``) is part of the term. Bare terms search id, name, product, EC, GO, Dbxref
-and the remaining GFF attributes. An empty query matches nothing; an invalid regular expression is an error.
+the remaining GFF attributes, and the genome (catalog id, strain, aliases) and species names, so
+``Ld1S kinase`` finds kinases of Ld1S. ``genome:`` matches the catalog id, the strain and the aliases
+(``genome:Ld1S``, ``genome:pasteur``). An empty query matches nothing; an invalid regular expression is an error.
 
 The Python (``leishgene/search.py``) and JavaScript (``web/query.js``) matchers are checked against the same
 vectors in ``tests/query_cases.json``.
