@@ -1,0 +1,44 @@
+# GFFs that replace or complete the leishref catalog (see docs/data.rst).
+# gff is relative to this file; seqid_map renames GFF sequences to the names of the catalog FASTA.
+# Ld1S.gff: annotation of the Ld1S assembly (GCA_002243465.1; identical sequence, sequences numbered
+# 1..36 and maxi in the order of the NCBI records).
+GCA_002243465.1:
+  gff: Ld1S.gff
+  seqid_map:
+    '1': CP022616.1
+    '2': CP022617.1
+    '3': CP022618.1
+    '4': CP022619.1
+    '5': CP022620.1
+    '6': CP022621.1
+    '7': CP022622.1
+    '8': CP022623.1
+    '9': CP022624.1
+    '10': CP022625.1
+    '11': CP022626.1
+    '12': CP022627.1
+    '13': CP022628.1
+    '14': CP022629.1
+    '15': CP022630.1
+    '16': CP022631.1
+    '17': CP022632.1
+    '18': CP022633.1
+    '19': CP022634.1
+    '20': CP022635.1
+    '21': CP022636.1
+    '22': CP022637.1
+    '23': CP022638.1
+    '24': CP022639.1
+    '25': CP022640.1
+    '26': CP022641.1
+    '27': CP022642.1
+    '28': CP022643.1
+    '29': CP022644.1
+    '30': CP022645.1
+    '31': CP022646.1
+    '32': CP022647.1
+    '33': CP022648.1
+    '34': CP022649.1
+    '35': CP022650.1
+    '36': CP022651.1
+    'maxi': CP022652.1

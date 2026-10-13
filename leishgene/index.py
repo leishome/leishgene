@@ -41,7 +41,7 @@ def build_index(out_dir: Path, sources: list, strict: bool = False) -> list:
             entry["status"] = "missing"
             manifest.append(entry)
             continue
-        genes = parse_gff(source.gff_path, source.genome_id)
+        genes = parse_gff(source.gff_path, source.genome_id, source.seqid_map)
         entry["genes"] = len(genes)
         if not genes:
             entry["status"] = "empty"

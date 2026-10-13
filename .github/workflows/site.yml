@@ -7,7 +7,7 @@ name: Publish gene search page
 on:
   push:
     branches: [main]
-    paths: ["leishgene/**", "web/**", "pyproject.toml", ".github/workflows/site.yml"]
+    paths: ["leishgene/**", "web/**", "data/**", "pyproject.toml", ".github/workflows/site.yml"]
   workflow_dispatch:
 
 permissions:
@@ -49,6 +49,7 @@ jobs:
             leishref install "$genome" --alias "$genome" --no-link
           done
       - name: Build index
+        # data/extra/gff_overrides.yaml adds GFFs the catalog lacks (Ld1S) and is read automatically
         run: |
           leishgene build --strict -i index
           leishgene export -i index -o web/data

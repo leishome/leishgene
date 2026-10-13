@@ -12,9 +12,10 @@ from leishgene.budget import check_budget
 from leishgene.export import SiteIndexError, export_site, load_manifest
 from leishgene.index import MissingGffError, build_index
 from leishgene.search import QueryError, parse_query
-from leishgene.sources import list_sources
+from leishgene.sources import list_sources, load_overrides
 
 DEFAULT_INDEX = Path.home() / ".cache" / "leishgene"
+DEFAULT_OVERRIDES = Path("data/extra/gff_overrides.yaml")
 
 index_option = click.option(
     "-i",
@@ -35,11 +36,19 @@ def cli():
 @cli.command()
 @index_option
 @click.option("--strict", is_flag=True, help="Fail when a catalog GFF is not in the local cache")
-def build(index_dir, strict):
+@click.option(
+    "--overrides",
+    type=click.Path(path_type=Path),
+    default=DEFAULT_OVERRIDES,
+    show_default=True,
+    help="YAML of GFFs that replace or complete the catalog (used when the file exists)",
+)
+def build(index_dir, strict, overrides):
     """Parse the cached GFFs of every catalog genome that has one and write the index."""
     try:
-        manifest = build_index(index_dir, list_sources(), strict=strict)
-    except MissingGffError as exc:
+        sources = list_sources(overrides=load_overrides(overrides) if overrides.is_file() else None)
+        manifest = build_index(index_dir, sources, strict=strict)
+    except (MissingGffError, ValueError, FileNotFoundError) as exc:
         raise click.ClickException(str(exc))
     ok = [e for e in manifest if e["status"] == "ok"]
     click.echo(f"{len(ok)}/{len(manifest)} genomes, {sum(e['genes'] for e in ok)} genes -> {index_dir}")

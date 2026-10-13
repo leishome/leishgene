@@ -1,7 +1,7 @@
 # leishgene
 
 Search genes and annotations across the *Leishmania* genomes of the [leishref](https://github.com/leishome/leishref)
-catalog that have a GFF (38 at the time of writing): a Python package and a static website.
+catalog that have a GFF (38 at the time of writing, plus Ld1S from `data/extra/`): a Python package and a static website.
 
 ```bash
 pip install leishgene

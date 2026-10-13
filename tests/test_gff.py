@@ -118,3 +118,38 @@ def test_veupathdb_protein_coding_gene_and_polypeptide(tmp_path):
     )
     (g,) = parse_gff(path, "G")
     assert g.id == "LdBPK_1" and g.type == "protein_coding_gene" and g.product == "kinesin"
+
+
+def test_augustus_dialect_quoted_attributes():
+    genes = by_id(parse_gff(FIX / "ld1s.gff", "G"))
+    g = genes["Ld1S_010012800"]
+    assert (g.seqid, g.start, g.end, g.strand, g.type) == ("1", 246264, 247475, "+", "gene")
+    assert g.name == "Ld1S_010012800" and g.product == "Eukaryotic initiation factor 4A-1"
+    assert g.go == ["GO:0006412", "GO:0005524", "GO:0004004", "GO:0008186", "GO:0003729", "GO:0003676"] + [
+        "GO:0005829",
+        "GO:0016281",
+    ]
+    assert g.attrs == {}  # empty info, duplicated transcript_id and the folded fields are not kept
+
+
+def test_augustus_dialect_na_go_is_dropped_and_semicolons_in_quotes_survive():
+    genes = by_id(parse_gff(FIX / "ld1s.gff", "G"))
+    assert genes["Ld1S_010013400"].go == []
+    pseudo = genes["Ld1S_010010200_pseudogene"]
+    assert pseudo.type == "pseudogene" and pseudo.product == "fatty acyl CoA synthetase 2, putative"
+    assert pseudo.attrs["info"].startswith("has_internal_stop=true;has_frameshift=true;")
+    assert pseudo.attrs["info"].endswith("original_prot_length=195")
+
+
+def test_augustus_dialect_type_attribute_and_extra_attrs():
+    genes = by_id(parse_gff(FIX / "ld1s.gff", "G"))
+    assert genes["LD11Cs1H1_c1"].type == "snoRNA" and genes["LD11Cs1H1_c1"].go == ["GO:0009302", "GO:0006396"]
+    assert genes["LD11Cs1H1_c1"].attrs == {"matchingNcRNAs": "LD11Cs1H1"}
+    assert genes["LdBPK_270030140_aln1"].type == "rRNA"
+    assert genes["LdBPK_270030140_aln1"].attrs["ann"] == "orthologous_to=LmjF27.rRNA.13"
+    assert genes["Ld1S_100029100"].attrs == {}  # empty function=""
+
+
+def test_seqid_map_renames_sequences():
+    genes = parse_gff(FIX / "ld1s.gff", "G", seqid_map={"1": "CP022616.1", "27": "CP022642.1"})
+    assert {g.seqid for g in genes} == {"CP022616.1", "CP022642.1", "10", "11"}

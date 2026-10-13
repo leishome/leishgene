@@ -1,5 +1,6 @@
 """GFF3 parsing: one Gene record per gene, with its transcripts and CDS folded in."""
 import gzip
+import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from urllib.parse import unquote
@@ -84,7 +85,31 @@ def _parse_attributes(text: str):
     return attrs, lists
 
 
-def _read_rows(path: Path) -> list:
+_QUOTED = re.compile(r'(\w+)="([^"]*)"')
+_GO_FIELDS = ("BP", "MF", "CC")
+_QUOTED_FOLDED = {"gene_id", "combinedAnnotation", "type", *_GO_FIELDS}
+
+
+def _parse_quoted_attributes(text: str):
+    """AUGUSTUS-style ``key="value"; ...`` attributes, mapped onto the GFF3 vocabulary.
+
+    ``gene_id`` is the ID, ``combinedAnnotation`` the product and ``BP``/``MF``/``CC`` hold ``;``-separated
+    GO terms (``NA`` when empty). ``type`` refines the column-3 type (pseudogene, snoRNA, ...) and is
+    returned under ``type``. Empty values and ``transcript_id`` copies of the ID are dropped.
+    """
+    raw = dict(_QUOTED.findall(text))
+    attrs = {"ID": raw.get("gene_id", ""), "type": raw.get("type", "")}
+    if raw.get("combinedAnnotation"):
+        attrs["product"] = raw["combinedAnnotation"]
+    for key, value in raw.items():
+        if key in _QUOTED_FOLDED or not value or (key == "transcript_id" and value == attrs["ID"]):
+            continue
+        attrs[key] = value
+    go = [t for field_ in _GO_FIELDS for t in raw.get(field_, "").split(";") if t and t != "NA"]
+    return attrs, {"Ontology_term": go} if go else {}
+
+
+def _read_rows(path: Path, seqid_map=None) -> list:
     rows = []
     with _open(path) as handle:
         for line in handle:
@@ -95,8 +120,14 @@ def _read_rows(path: Path) -> list:
             cols = line.rstrip("\n").split("\t")
             if len(cols) < 9:
                 continue
-            attrs, lists = _parse_attributes(cols[8])
-            rows.append(_Row(cols[0], int(cols[3]), int(cols[4]), cols[6], cols[2], attrs, lists))
+            feature_type = cols[2]
+            if '="' in cols[8]:
+                attrs, lists = _parse_quoted_attributes(cols[8])
+                feature_type = attrs.pop("type") or feature_type
+            else:
+                attrs, lists = _parse_attributes(cols[8])
+            seqid = (seqid_map or {}).get(cols[0], cols[0])
+            rows.append(_Row(seqid, int(cols[3]), int(cols[4]), cols[6], feature_type, attrs, lists))
     return rows
 
 
@@ -134,13 +165,16 @@ def _build(genome: str, row: _Row, members: list) -> Gene:
     return gene
 
 
-def parse_gff(path: Path, genome: str) -> list:
+def parse_gff(path: Path, genome: str, seqid_map=None) -> list:
     """Parse a (possibly gzipped) GFF3 file into Gene records, in file order of their top-level rows.
+
+    ``seqid_map`` renames sequences (GFF name -> name used by the genome's FASTA at the catalog).
+    Rows with ``key="value"`` attributes (AUGUSTUS-style, see ``_parse_quoted_attributes``) are read too.
 
     Rows are grouped under the top of their Parent chain (the gene, or the mRNA/CDS of a gene-less
     annotation); rows that repeat an ID are merged into the first one.
     """
-    rows = _read_rows(path)
+    rows = _read_rows(path, seqid_map)
     by_id: dict = {}
     for row in rows:
         if row.id:

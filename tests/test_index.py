@@ -58,3 +58,11 @@ def test_zero_gene_genome_status_ok_count_zero(tmp_path):
     manifest = build_index(tmp_path / "out", [src("G1", "empty.gff", empty)])
     assert manifest[0]["status"] == "empty" and manifest[0]["genes"] == 0
     assert load(tmp_path / "out" / "G1.json") == []
+
+
+def test_seqid_map_applied_to_shard(tmp_path):
+    source = src("G1", "ld1s.gff", FIX / "ld1s.gff")
+    source.seqid_map = {"1": "CP022616.1"}
+    build_index(tmp_path, [source])
+    seqids = {g["seqid"] for g in load(tmp_path / "G1.json")}
+    assert "CP022616.1" in seqids and "1" not in seqids

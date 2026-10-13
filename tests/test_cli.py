@@ -127,3 +127,45 @@ def test_export_ships_shard_of_empty_genome(tmp_path):
     result = run("export", "-i", idx, "-o", tmp_path / "site")
     assert result.exit_code == 0, result.output
     assert (tmp_path / "site" / "E.json").exists()
+
+
+def test_build_with_overrides_file(tmp_path, monkeypatch):
+    import leishgene.cli as cli_module
+
+    (tmp_path / "x.gff").write_text((FIX / "ld1s.gff").read_text())
+    overrides = tmp_path / "gff_overrides.yaml"
+    overrides.write_text("G9:\n  gff: x.gff\n  seqid_map:\n    '1': CP1.1\n")
+    seen = {}
+
+    def fake_list_sources(overrides=None):
+        seen["overrides"] = overrides
+        return [
+            GenomeSource(
+                "G9",
+                "x.gff",
+                "Leishmania donovani",
+                "1S",
+                [],
+                overrides["G9"].gff_path,
+                overrides["G9"].seqid_map,
+                True,
+            )
+        ]
+
+    monkeypatch.setattr(cli_module, "list_sources", fake_list_sources)
+    out = tmp_path / "idx"
+    result = run("build", "-i", out, "--overrides", overrides)
+    assert result.exit_code == 0, result.output
+    assert seen["overrides"]["G9"].seqid_map == {"1": "CP1.1"}
+    assert {g["seqid"] for g in json.loads((out / "G9.json").read_text())} >= {"CP1.1"}
+
+
+def test_build_without_overrides_file_uses_catalog_only(tmp_path, monkeypatch):
+    import leishgene.cli as cli_module
+
+    monkeypatch.chdir(tmp_path)  # no data/extra/gff_overrides.yaml here
+    seen = {}
+    monkeypatch.setattr(cli_module, "list_sources", lambda overrides=None: seen.setdefault("o", overrides) or [])
+    result = run("build", "-i", tmp_path / "idx")
+    assert result.exit_code == 0, result.output
+    assert seen["o"] in (None, {})
