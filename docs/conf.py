@@ -12,5 +12,6 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon"]
 exclude_patterns = ["_build"]
 master_doc = "index"
 html_theme = "sphinx_rtd_theme"
+html_logo = "logo-small.png"
 autodoc_mock_imports = ["leishref", "rich_click", "rich"]
 autodoc_default_options = {"members": True, "member-order": "bysource"}

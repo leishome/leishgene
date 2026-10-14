@@ -1,5 +1,7 @@
 # leishgene
 
+![leishgene logo](docs/logo-small.png)
+
 Search genes and annotations across the *Leishmania* genomes of the [leishref](https://github.com/leishome/leishref)
 catalog that have a GFF (38 at the time of writing, plus Ld1S from `data/extra/`): a Python package and a static website.
 
@@ -13,5 +15,7 @@ leishgene export -o web/data                 # data for the static site in web/
 
 Query grammar: words are AND-ed; `kinas*` globs; `/regex/`; `"phrases"`; `field:value` with
 `id name product type species genome ec go dbxref`. See `docs/` (build with `cd docs && make html`).
+
+Live site: <https://leishome.github.io/leishgene/>
 
 Not in scope yet: fetching GFFs for genomes that lack one, orthology.
