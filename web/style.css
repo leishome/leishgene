@@ -65,3 +65,4 @@ mark { background: var(--accent-soft); color: var(--text); font-weight: 600; bor
 .pos-axis { stroke: var(--line); stroke-width: 1; }
 .dt td a { color: var(--accent); }
 #status { min-width: 170px; }
+.logo img { height: 64px; width: 64px; display: block; border-radius: 10px; }
