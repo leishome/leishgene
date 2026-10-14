@@ -35,6 +35,13 @@ jobs:
         run: |
           pip install "git+https://github.com/leishome/leishref"
           pip install .
+      - name: Install the NCBI datasets CLI
+        # leishref downloads NCBI genomes through the `datasets` program
+        run: |
+          mkdir -p "$HOME/bin"
+          curl -fsSL -o "$HOME/bin/datasets" https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/datasets
+          chmod +x "$HOME/bin/datasets"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
       - name: Key for the leishref download cache
         id: genomes
         run: echo "hash=$(leishgene info --list-gff-genomes | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
