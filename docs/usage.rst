@@ -34,3 +34,8 @@ The "links" column of the table gives the UniProt entry of each ``UniProtKB/TrEM
 Dbxref, and a UniParc search on the protein accession (``protein_id``, else ``NCBI_GP``). The GFFs carry no
 UniParc identifier, so that link is a search that lands on the matching UniParc entry. Genomes whose GFF has no
 such cross-references, such as Ld1S, get no links.
+
+A click (or Enter) on a table row unfolds the EC numbers, GO terms, Dbxref values and remaining GFF attributes of
+the gene; EC, GO, GeneID, InterPro, PFAM, PDB and UniProt references are links. The address bar always holds the
+current search (``?q=...&all=1``), so a search can be shared by copying the URL. The "links" column adds an NCBI
+Gene link from the ``GeneID`` Dbxref.

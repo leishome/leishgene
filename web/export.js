@@ -1,4 +1,4 @@
-import { geneLength, uniprotAccessions } from "./links.js?v=8";
+import { geneLength, uniprotAccessions } from "./links.js?v=9";
 // Table export of search hits; same columns and quoting as leishgene/table.py.
 export const COLUMNS = ["genome", "species", "strain", "seqid", "start", "end", "length", "strand", "id", "name", "type", "product", "ec", "go", "dbxref", "uniprot"];
 const LIST_COLUMNS = new Set(["ec", "go", "dbxref", "uniprot"]);

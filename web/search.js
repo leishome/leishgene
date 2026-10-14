@@ -1,8 +1,10 @@
-import { download, fileName, toDelimited } from "./export.js?v=8";
-import { countBy, withOther } from "./stats.js?v=8";
-import { geneLength, geneLinks } from "./links.js?v=8";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=8";
-import { createShardCache } from "./shards.js?v=8";
+import { download, fileName, toDelimited } from "./export.js?v=9";
+import { countBy, withOther } from "./stats.js?v=9";
+import { detailSections } from "./detail.js?v=9";
+import { geneLength, geneLinks } from "./links.js?v=9";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=9";
+import { createShardCache } from "./shards.js?v=9";
+import { searchParams } from "./url.js?v=9";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
@@ -84,6 +86,42 @@ function renderCharts(stats, total) {
   if (stats.types) box.append(barChart("Matches by type", stats.types, 10, (t) => t, (t) => (t === "unknown" ? null : `type:${quoteValue(t)}`)));
 }
 
+// Expands or folds the row that lists EC, GO, Dbxref and attributes of a gene.
+function toggleDetail(tr, gene) {
+  const next = tr.nextElementSibling;
+  if (next && next.classList.contains("detail")) {
+    next.remove();
+    tr.setAttribute("aria-expanded", "false");
+    return;
+  }
+  const row = document.createElement("tr");
+  row.className = "detail";
+  const cell = document.createElement("td");
+  cell.colSpan = tr.children.length;
+  const sections = detailSections(gene);
+  if (sections.length === 0) cell.textContent = "No further annotation for this gene.";
+  for (const { label, items } of sections) {
+    const line = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = `${label}: `;
+    line.append(title);
+    items.forEach((item, i) => {
+      const el = item.url ? document.createElement("a") : document.createElement("span");
+      el.textContent = item.text;
+      if (item.url) {
+        el.href = item.url;
+        el.target = "_blank";
+        el.rel = "noopener";
+      }
+      line.append(el, i < items.length - 1 ? ", " : "");
+    });
+    cell.append(line);
+  }
+  row.append(cell);
+  tr.after(row);
+  tr.setAttribute("aria-expanded", "true");
+}
+
 function render(rows, total, namesOnly, stats) {
   const body = $("#results tbody");
   body.replaceChildren();
@@ -116,6 +154,18 @@ function render(rows, total, namesOnly, stats) {
       links.append(a, document.createElement("br"));
     }
     tr.append(links);
+    tr.className = "clickable";
+    tr.tabIndex = 0;
+    tr.setAttribute("aria-expanded", "false");
+    tr.addEventListener("click", (e) => {
+      if (!e.target.closest("a")) toggleDetail(tr, g);
+    });
+    tr.addEventListener("keydown", (e) => {
+      if (e.target === tr && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        toggleDetail(tr, g);
+      }
+    });
     body.append(tr);
   }
   $("#results").hidden = rows.length === 0;
@@ -220,6 +270,7 @@ async function exportTable(sep, ext) {
 }
 
 async function onQuery() {
+  history.replaceState(null, "", `${location.pathname}${searchParams(location.search, $("#q").value, $("#all").checked)}${location.hash}`);
   try {
     await search();
   } catch (e) {
@@ -249,9 +300,11 @@ async function init() {
   $("#all").addEventListener("change", onQuery);
   $("#export-tsv").addEventListener("click", () => exportTable("\t", "tsv"));
   $("#export-csv").addEventListener("click", () => exportTable(",", "csv"));
-  const initial = new URLSearchParams(location.search).get("q");
+  const params = new URLSearchParams(location.search);
+  const initial = params.get("q");
   if (initial) {
     $("#q").value = initial;
+    $("#all").checked = params.get("all") === "1";
     onQuery();
   }
 }
