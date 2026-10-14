@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from leishgene.export import export_site
 from leishgene.gff import read_seqlens
