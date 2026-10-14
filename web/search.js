@@ -1,6 +1,6 @@
-import { download, toDelimited } from "./export.js";
-import { needsShards, parseQuery, QueryError } from "./query.js";
-import { createShardCache } from "./shards.js";
+import { download, toDelimited } from "./export.js?v=3";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=3";
+import { createShardCache } from "./shards.js?v=3";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
