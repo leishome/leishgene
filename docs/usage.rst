@@ -20,6 +20,6 @@ used when it exists). ``leishgene build --strict`` fails when a catalog GFF is n
 
 To try the website locally: ``leishgene export -o web/data && python -m http.server --directory web``.
 
-On the website, the TSV and CSV buttons above the results download every match of the current search, not only
+On the website, the TSV and CSV buttons above the results (with an optional file name box) download every match of the current search, not only
 the rows shown. Columns: genome, species, seqid, start, end, strand, id, name, type, product, ec, go, dbxref
 (list values joined with ``;``). ``leishgene search QUERY -o FILE`` writes the same table.

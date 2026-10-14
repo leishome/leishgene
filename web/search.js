@@ -1,6 +1,6 @@
-import { download, toDelimited } from "./export.js?v=3";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=3";
-import { createShardCache } from "./shards.js?v=3";
+import { download, fileName, toDelimited } from "./export.js?v=4";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=4";
+import { createShardCache } from "./shards.js?v=4";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
@@ -135,8 +135,7 @@ async function exportTable(sep, ext) {
   $("#status").textContent = "Preparing export…";
   try {
     const genes = await getMatches();
-    const slug = $("#q").value.trim().replace(/[^\w.-]+/g, "_").slice(0, 40) || "search";
-    download(toDelimited(genes, sep), `leishgene_${slug}.${ext}`, "text/plain");
+    download(toDelimited(genes, sep), fileName($("#export-name").value, $("#q").value, ext), "text/plain");
   } finally {
     $("#status").textContent = status;
   }

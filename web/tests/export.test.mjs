@@ -21,3 +21,21 @@ test("csv quotes commas and missing fields are empty", () => {
   const row = toDelimited([{ id: "x", product: "a,b" }], ",").split("\n")[1];
   assert.equal(row, ',,,,,,x,,,"a,b",,,');
 });
+
+import { fileName } from "../export.js";
+
+test("fileName falls back to the query", () => {
+  assert.equal(fileName("", "Ld1S kinase", "tsv"), "leishgene_Ld1S_kinase.tsv");
+  assert.equal(fileName("   ", "", "csv"), "leishgene_search.csv");
+});
+
+test("fileName uses the typed name and the button extension", () => {
+  assert.equal(fileName("hits", "kinase", "tsv"), "hits.tsv");
+  assert.equal(fileName("hits.csv", "kinase", "tsv"), "hits.tsv");
+  assert.equal(fileName("my hits/v2", "kinase", "csv"), "my_hits_v2.csv");
+  assert.equal(fileName("v1.2", "kinase", "csv"), "v1.2.csv");
+});
+
+test("fileName ignores a name that sanitises to nothing", () => {
+  assert.equal(fileName("///", "kinase", "tsv"), "leishgene_kinase.tsv");
+});

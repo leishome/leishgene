@@ -28,3 +28,4 @@ footer { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; border-top: 1p
 .bar .actions { flex: 0 0 auto; }
 .export { font: inherit; padding: 2px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--text); cursor: pointer; }
 .export:disabled { opacity: .5; cursor: default; }
+#export-name { font: inherit; padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--text); }

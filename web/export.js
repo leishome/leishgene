@@ -22,3 +22,11 @@ export function download(text, filename, mime) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+const sanitise = (text) => text.trim().replace(/[^\w.-]+/g, "_").replace(/^_+|_+$/g, "");
+
+// Download name: the typed one (extension forced to the clicked format), else one derived from the query.
+export function fileName(typed, query, ext) {
+  const name = sanitise(typed).replace(/\.(tsv|csv)$/i, "");
+  return `${name || `leishgene_${sanitise(query).slice(0, 40) || "search"}`}.${ext}`;
+}
