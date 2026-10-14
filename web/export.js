@@ -1,9 +1,10 @@
+import { geneLength, uniprotAccessions } from "./links.js?v=8";
 // Table export of search hits; same columns and quoting as leishgene/table.py.
-export const COLUMNS = ["genome", "species", "strain", "seqid", "start", "end", "strand", "id", "name", "type", "product", "ec", "go", "dbxref"];
-const LIST_COLUMNS = new Set(["ec", "go", "dbxref"]);
+export const COLUMNS = ["genome", "species", "strain", "seqid", "start", "end", "length", "strand", "id", "name", "type", "product", "ec", "go", "dbxref", "uniprot"];
+const LIST_COLUMNS = new Set(["ec", "go", "dbxref", "uniprot"]);
 
 function cell(gene, column, sep) {
-  const v = gene[column];
+  const v = column === "length" ? geneLength(gene) : column === "uniprot" ? uniprotAccessions(gene) : gene[column];
   let text = v === undefined || v === null ? "" : LIST_COLUMNS.has(column) ? v.join(";") : String(v);
   if (text.includes(sep) || /["\n\r]/.test(text)) text = `"${text.replaceAll('"', '""')}"`;
   return text;

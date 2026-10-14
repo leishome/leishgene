@@ -8,18 +8,18 @@ const gene = {
 };
 
 test("columns are fixed", () => {
-  assert.deepEqual(COLUMNS, "genome species strain seqid start end strand id name type product ec go dbxref".split(" "));
+  assert.deepEqual(COLUMNS, "genome species strain seqid start end length strand id name type product ec go dbxref uniprot".split(" "));
 });
 
 test("tsv quotes fields and joins lists", () => {
   const [header, row] = toDelimited([gene], "\t").split("\n");
   assert.equal(header, COLUMNS.join("\t"));
-  assert.equal(row, 'G1\tLeishmania donovani\tpasteur\tc1\t5\t90\t-\tg1\tg1\tgene\t"kinase, ""putative""\tline"\t2.7.11.1;2.7.1.1\t\tGeneID:1');
+  assert.equal(row, 'G1\tLeishmania donovani\tpasteur\tc1\t5\t90\t86\t-\tg1\tg1\tgene\t"kinase, ""putative""\tline"\t2.7.11.1;2.7.1.1\t\tGeneID:1\t');
 });
 
 test("csv quotes commas and missing fields are empty", () => {
   const row = toDelimited([{ id: "x", product: "a,b" }], ",").split("\n")[1];
-  assert.equal(row, ',,,,,,,x,,,"a,b",,,');
+  assert.equal(row, ',,,,,,,,x,,,"a,b",,,,');
 });
 
 import { fileName } from "../export.js";

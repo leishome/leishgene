@@ -22,9 +22,15 @@ To try the website locally: ``leishgene export -o web/data && python -m http.ser
 
 On the website, the TSV and CSV buttons above the results (with an optional file name box) download every match of the current search, not only
 the rows shown. Columns: genome, species, seqid, start, end, strand, id, name, type, product, ec, go, dbxref
-(list values joined with ``;``). ``leishgene search QUERY -o FILE`` writes the same table.
+(list values joined with ``;``); ``length`` is ``end - start + 1`` in bp and ``uniprot`` the UniProtKB accessions of the
+Dbxref values. ``leishgene search QUERY -o FILE`` writes the same table.
 
 Above the table, two bar charts count all matches of the search (not only the rows shown): matches per genome
 (top 12, the rest folded into "others") and matches by type (shown when the search loads the genome data,
 that is with "search all annotation fields" or a ``type:``, ``ec:``, ``go:`` or ``dbxref:`` term). A click on a
 bar adds ``genome:ID`` or ``type:NAME`` to the query. The table and the exports include the strain.
+
+The "links" column of the table gives the UniProt entry of each ``UniProtKB/TrEMBL`` or ``UniProtKB/Swiss-Prot``
+Dbxref, and a UniParc search on the protein accession (``protein_id``, else ``NCBI_GP``). The GFFs carry no
+UniParc identifier, so that link is a search that lands on the matching UniParc entry. Genomes whose GFF has no
+such cross-references, such as Ld1S, get no links.

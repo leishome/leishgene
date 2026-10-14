@@ -9,6 +9,7 @@ COLUMNS = (
     "seqid",
     "start",
     "end",
+    "length",
     "strand",
     "id",
     "name",
@@ -17,12 +18,28 @@ COLUMNS = (
     "ec",
     "go",
     "dbxref",
+    "uniprot",
 )
 LIST_COLUMNS = {"ec", "go", "dbxref"}
 DELIMITERS = {".tsv": "\t", ".csv": ","}
 
 
+def uniprot_accessions(gene: dict) -> list:
+    """Accessions of the UniProtKB/TrEMBL and UniProtKB/Swiss-Prot Dbxref values, once each."""
+    out = []
+    for ref in gene.get("dbxref") or []:
+        if ref.startswith("UniProtKB/"):
+            accession = ref.split(":", 1)[1] if ":" in ref else ""
+            if accession and accession not in out:
+                out.append(accession)
+    return out
+
+
 def _cell(gene: dict, column: str) -> str:
+    if column == "length":
+        return str(gene["end"] - gene["start"] + 1) if "start" in gene and "end" in gene else ""
+    if column == "uniprot":
+        return ";".join(uniprot_accessions(gene))
     value = gene.get(column)
     if value is None:
         return ""

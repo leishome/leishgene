@@ -1,7 +1,8 @@
-import { download, fileName, toDelimited } from "./export.js?v=7";
-import { countBy, withOther } from "./stats.js?v=7";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=7";
-import { createShardCache } from "./shards.js?v=7";
+import { download, fileName, toDelimited } from "./export.js?v=8";
+import { countBy, withOther } from "./stats.js?v=8";
+import { geneLength, geneLinks } from "./links.js?v=8";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=8";
+import { createShardCache } from "./shards.js?v=8";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
@@ -93,6 +94,7 @@ function render(rows, total, namesOnly, stats) {
       g.species || "",
       g.strain || "",
       g.seqid !== undefined ? `${g.seqid}:${g.start}-${g.end}` : "",
+      geneLength(g) === "" ? "" : `${geneLength(g).toLocaleString("en")} bp`,
       g.strand || "",
       g.id,
       g.type || "",
@@ -100,10 +102,20 @@ function render(rows, total, namesOnly, stats) {
     ];
     cells.forEach((text, i) => {
       const td = document.createElement("td");
-      if (i === 3 || i === 5) td.className = "mono";
+      if (i === 3 || i === 4 || i === 6) td.className = "mono";
       td.textContent = text;
       tr.append(td);
     });
+    const links = document.createElement("td");
+    for (const { label, url } of geneLinks(g)) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.textContent = label;
+      a.target = "_blank";
+      a.rel = "noopener";
+      links.append(a, document.createElement("br"));
+    }
+    tr.append(links);
     body.append(tr);
   }
   $("#results").hidden = rows.length === 0;
