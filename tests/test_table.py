@@ -5,6 +5,8 @@ from leishgene.table import COLUMNS, write_table
 GENE = {
     "genome": "G1",
     "species": "Leishmania donovani",
+    "strain": "pasteur",
+    "strain": "pasteur",
     "seqid": "c1",
     "start": 5,
     "end": 90,
@@ -20,7 +22,7 @@ GENE = {
 
 
 def test_columns_are_fixed():
-    assert list(COLUMNS) == "genome species seqid start end strand id name type product ec go dbxref".split()
+    assert list(COLUMNS) == "genome species strain seqid start end strand id name type product ec go dbxref".split()
 
 
 def test_write_tsv_quotes_and_joins_lists(tmp_path):
@@ -30,7 +32,7 @@ def test_write_tsv_quotes_and_joins_lists(tmp_path):
     assert header == "\t".join(COLUMNS)
     assert (
         row
-        == 'G1\tLeishmania donovani\tc1\t5\t90\t-\tg1\tg1\tgene\t"kinase, ""putative""\tline"\t2.7.11.1;2.7.1.1\t\tGeneID:1'
+        == 'G1\tLeishmania donovani\tpasteur\tc1\t5\t90\t-\tg1\tg1\tgene\t"kinase, ""putative""\tline"\t2.7.11.1;2.7.1.1\t\tGeneID:1'
     )
 
 

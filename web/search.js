@@ -1,6 +1,7 @@
-import { download, fileName, toDelimited } from "./export.js?v=4";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=4";
-import { createShardCache } from "./shards.js?v=4";
+import { download, fileName, toDelimited } from "./export.js?v=7";
+import { countBy, withOther } from "./stats.js?v=7";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=7";
+import { createShardCache } from "./shards.js?v=7";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
@@ -23,7 +24,66 @@ const loadShard = createShardCache(async (index) => {
   return genes;
 });
 
-function render(rows, total, namesOnly) {
+const genomeLabel = (id) => {
+  const entry = manifest.find((m) => m.genome === id);
+  return entry && entry.strain ? `${id} (${entry.strain})` : id;
+};
+
+// One horizontal bar chart: single series, so no legend; each bar adds a filter to the query when clicked.
+function barChart(title, entries, maxBars, labelOf, filterOf) {
+  const { shown, other } = withOther(entries, maxBars);
+  const max = Math.max(...entries.map((e) => e[1]));
+  const box = document.createElement("div");
+  box.className = "chart";
+  const h = document.createElement("h3");
+  h.textContent = title;
+  box.append(h);
+  const row = (label, count, tip, filter) => {
+    const el = document.createElement(filter ? "button" : "div");
+    el.className = "bar-row";
+    if (filter) {
+      el.type = "button";
+      el.addEventListener("click", () => applyFilter(filter));
+    }
+    el.title = tip;
+    const name = document.createElement("span");
+    name.className = "bar-label";
+    name.textContent = label;
+    const track = document.createElement("span");
+    track.className = "bar-track";
+    const bar = document.createElement("span");
+    bar.className = "hbar";
+    bar.style.width = `${Math.max((count / max) * 100, 0.5)}%`;
+    if (filter !== undefined) track.append(bar); // the folded "others" row has no bar: its sum would dwarf the real ones
+    const value = document.createElement("span");
+    value.className = "bar-value";
+    value.textContent = count.toLocaleString("en");
+    el.append(name, track, value);
+    box.append(el);
+  };
+  for (const [key, count] of shown) row(labelOf(key), count, `${labelOf(key)}: ${count.toLocaleString("en")} matches` + (filterOf ? " (click to filter)" : ""), filterOf ? filterOf(key) : null);
+  if (other) row(`${other.groups} others`, other.count, `${other.groups} more: ${other.count.toLocaleString("en")} matches`);
+  return box;
+}
+
+function applyFilter(filter) {
+  const q = $("#q");
+  q.value = `${q.value.trim()} ${filter}`.trim();
+  onQuery();
+}
+
+const quoteValue = (v) => (/\s/.test(v) ? `"${v}"` : v);
+
+function renderCharts(stats, total) {
+  const box = $("#charts");
+  box.replaceChildren();
+  box.hidden = total === 0 || !stats;
+  if (box.hidden) return;
+  box.append(barChart("Matches per genome", stats.genomes, 12, genomeLabel, (id) => `genome:${quoteValue(id)}`));
+  if (stats.types) box.append(barChart("Matches by type", stats.types, 10, (t) => t, (t) => (t === "unknown" ? null : `type:${quoteValue(t)}`)));
+}
+
+function render(rows, total, namesOnly, stats) {
   const body = $("#results tbody");
   body.replaceChildren();
   for (const g of rows) {
@@ -31,6 +91,7 @@ function render(rows, total, namesOnly) {
     const cells = [
       g.genome,
       g.species || "",
+      g.strain || "",
       g.seqid !== undefined ? `${g.seqid}:${g.start}-${g.end}` : "",
       g.strand || "",
       g.id,
@@ -39,13 +100,14 @@ function render(rows, total, namesOnly) {
     ];
     cells.forEach((text, i) => {
       const td = document.createElement("td");
-      if (i === 2 || i === 4) td.className = "mono";
+      if (i === 3 || i === 5) td.className = "mono";
       td.textContent = text;
       tr.append(td);
     });
     body.append(tr);
   }
   $("#results").hidden = rows.length === 0;
+  renderCharts(stats, total);
   for (const b of document.querySelectorAll(".export")) b.disabled = total === 0;
   let status = total > rows.length ? `${total} matches, showing ${rows.length}` : `${total} match(es)`;
   if (total === 0 && namesOnly) status += " in id/name/product; tick 'search all annotation fields' to search EC, GO, Dbxref and attributes";
@@ -76,6 +138,7 @@ async function search() {
   }
   const wantShards = needsShards(query, $("#all").checked);
   let hits = [];
+  let stats = null;
   const matched = [];
   let total = 0;
   if (wantShards) {
@@ -94,6 +157,7 @@ async function search() {
       }
     }
     hits = matched.slice(0, LIMIT);
+    stats = { genomes: countBy(matched, (g) => g.genome), types: countBy(matched, (g) => g.type) };
     getMatches = async () => matched;
   } else {
     const all = [];
@@ -104,6 +168,7 @@ async function search() {
       }
     }
     total = all.length;
+    stats = { genomes: countBy(all, (r) => manifest[r.gi].genome), types: null };
     const rows = all.slice(0, LIMIT);
     // names.json carries no coordinates: fetch only the shards of the genomes that were hit
     const needed = [...new Set(rows.map((r) => r.gi))];
@@ -121,11 +186,12 @@ async function search() {
       return all.map((r) => genes.get(`${r.gi}\t${r.id}`)).filter(Boolean);
     };
   }
-  if (id === run) render(hits, total, !wantShards);
+  if (id === run) render(hits, total, !wantShards, stats);
 }
 
 function clearExport() {
   getMatches = null;
+  $("#charts").hidden = true;
   for (const b of document.querySelectorAll(".export")) b.disabled = true;
 }
 

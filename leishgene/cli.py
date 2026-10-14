@@ -97,10 +97,18 @@ def search(query, index_dir, limit, output):
                 if output is not None:
                     matched.append(gene)
     table = Table(title=f"{total} match(es)" + (f", showing {limit}" if total > limit else ""))
-    for column in ("genome", "location", "strand", "id", "type", "product"):
+    for column in ("genome", "strain", "location", "strand", "id", "type", "product"):
         table.add_column(column)
     for g in hits:
-        cells = (g["genome"], f"{g['seqid']}:{g['start']}-{g['end']}", g["strand"], g["id"], g["type"], g["product"])
+        cells = (
+            g["genome"],
+            g.get("strain", ""),
+            f"{g['seqid']}:{g['start']}-{g['end']}",
+            g["strand"],
+            g["id"],
+            g["type"],
+            g["product"],
+        )
         table.add_row(*(Text(str(c)) for c in cells))  # Text: product names contain [brackets], not Rich markup
     Console().print(table)
     if output is not None:

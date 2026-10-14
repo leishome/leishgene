@@ -24,7 +24,7 @@ def index_dir(tmp_path):
 
 
 def run(*args):
-    return CliRunner().invoke(cli, [str(a) for a in args])
+    return CliRunner().invoke(cli, [str(a) for a in args], env={"COLUMNS": "250"})
 
 
 def test_search_prints_hits(index_dir):
@@ -176,7 +176,7 @@ def test_search_output_writes_all_matches_not_just_limit(index_dir, tmp_path):
     result = run("search", "*", "-i", index_dir, "--limit", 1, "--output", out)
     assert result.exit_code == 0, result.output
     lines = out.read_text().splitlines()
-    assert lines[0].split("\t")[:3] == ["genome", "species", "seqid"]
+    assert lines[0].split("\t")[:4] == ["genome", "species", "strain", "seqid"]
     assert len(lines) - 1 > 1  # more rows than --limit
     assert "wrote" in result.output and str(out) in result.output.replace("\n", "")
 

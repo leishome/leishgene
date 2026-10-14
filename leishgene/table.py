@@ -5,6 +5,7 @@ from pathlib import Path
 COLUMNS = (
     "genome",
     "species",
+    "strain",
     "seqid",
     "start",
     "end",

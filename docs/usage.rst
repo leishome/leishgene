@@ -23,3 +23,8 @@ To try the website locally: ``leishgene export -o web/data && python -m http.ser
 On the website, the TSV and CSV buttons above the results (with an optional file name box) download every match of the current search, not only
 the rows shown. Columns: genome, species, seqid, start, end, strand, id, name, type, product, ec, go, dbxref
 (list values joined with ``;``). ``leishgene search QUERY -o FILE`` writes the same table.
+
+Above the table, two bar charts count all matches of the search (not only the rows shown): matches per genome
+(top 12, the rest folded into "others") and matches by type (shown when the search loads the genome data,
+that is with "search all annotation fields" or a ``type:``, ``ec:``, ``go:`` or ``dbxref:`` term). A click on a
+bar adds ``genome:ID`` or ``type:NAME`` to the query. The table and the exports include the strain.

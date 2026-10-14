@@ -1,5 +1,5 @@
 // Table export of search hits; same columns and quoting as leishgene/table.py.
-export const COLUMNS = ["genome", "species", "seqid", "start", "end", "strand", "id", "name", "type", "product", "ec", "go", "dbxref"];
+export const COLUMNS = ["genome", "species", "strain", "seqid", "start", "end", "strand", "id", "name", "type", "product", "ec", "go", "dbxref"];
 const LIST_COLUMNS = new Set(["ec", "go", "dbxref"]);
 
 function cell(gene, column, sep) {

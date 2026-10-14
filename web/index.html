@@ -25,17 +25,18 @@
   <input id="q" type="search" placeholder="Search genes… (e.g. kinase species:donovani, /^LdBPK_27/, type:tRNA)" autofocus aria-label="Search genes">
   <div class="bar">
     <span id="status">Loading index…</span>
-    <span class="actions">Export all matches as <input id="export-name" type="text" placeholder="leishgene_&lt;query&gt;" aria-label="Export file name" size="22">: <button id="export-tsv" class="export" type="button" disabled>TSV</button> <button id="export-csv" class="export" type="button" disabled>CSV</button></span>
+    <span class="actions">Export all matches as <input id="export-name" type="text" placeholder="leishgene_&lt;query&gt;" aria-label="Export file name" size="22"> <button id="export-tsv" class="export" type="button" disabled>TSV</button> <button id="export-csv" class="export" type="button" disabled>CSV</button></span>
     <label><input id="all" type="checkbox"> Search all annotation fields (downloads every genome)</label>
   </div>
   <div id="error" class="err" hidden></div>
+  <section id="charts" class="charts" hidden></section>
   <table class="dt" id="results" hidden>
-    <thead><tr><th>genome</th><th>species</th><th>location</th><th>strand</th><th>id</th><th>type</th><th>product</th></tr></thead>
+    <thead><tr><th>genome</th><th>species</th><th>strain</th><th>location</th><th>strand</th><th>id</th><th>type</th><th>product</th></tr></thead>
     <tbody></tbody>
   </table>
   <p id="missing" class="notes"></p>
 </main>
 <footer>Generated from the leishref catalog and its GFF annotations.</footer>
-<script type="module" src="search.js?v=4"></script>
+<script type="module" src="search.js?v=7"></script>
 </body>
 </html>
