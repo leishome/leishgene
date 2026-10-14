@@ -1,0 +1,25 @@
+OU755535.1	EMBL	gene	1504	5117	.	-	.	ID=gene-LMJFC_010005100:E1;Name=LMJFC_010005100;gbkey=Gene;gene=LMJFC_010005100;gene_biotype=other;locus_tag=LMJFC_010005100:E1
+OU755535.1	EMBL	exon	1504	5117	.	-	.	ID=id-LMJFC_010005100:E1;Parent=gene-LMJFC_010005100:E1;Note=source:CBMSO;gbkey=exon;gene=LMJFC_010005100;locus_tag=LMJFC_010005100:E1;product=Protein_of_unknown_function_(DUF2946)
+OU755535.1	EMBL	gene	1504	5117	.	-	.	ID=gene-LMJFC_010005100;Name=LMJFC_010005100;gbkey=Gene;gene_biotype=other;locus_tag=LMJFC_010005100
+OU755535.1	EMBL	gene	1504	5117	.	-	.	ID=gene-LMJFC_01T0005100;Name=LMJFC_010005100;gbkey=Gene;gene=LMJFC_010005100;gene_biotype=other;locus_tag=LMJFC_01T0005100
+OU755535.1	EMBL	mRNA	1504	5117	.	-	.	ID=rna-LMJFC_01T0005100;Parent=gene-LMJFC_01T0005100;Note=source:CBMSO;gbkey=mRNA;gene=LMJFC_010005100;locus_tag=LMJFC_01T0005100;product=Protein_of_unknown_function_(DUF2946)
+OU755535.1	EMBL	exon	1504	5117	.	-	.	ID=exon-LMJFC_01T0005100-1;Parent=rna-LMJFC_01T0005100;Note=source:CBMSO;gbkey=mRNA;gene=LMJFC_010005100;locus_tag=LMJFC_01T0005100;product=Protein_of_unknown_function_(DUF2946)
+OU755535.1	EMBL	gene	1504	3766	.	-	.	ID=gene-LMJFC_010005100:3'UTR;Name=LMJFC_010005100;gbkey=Gene;gene=LMJFC_010005100;gene_biotype=other;locus_tag=LMJFC_010005100:3'UTR
+OU755535.1	EMBL	three_prime_UTR	1504	3766	.	-	.	ID=id-LMJFC_010005100:3'UTR;Parent=gene-LMJFC_010005100:3'UTR;Note=source:CBMSO;gbkey=3'UTR;gene=LMJFC_010005100;locus_tag=LMJFC_010005100:3'UTR
+OU755535.1	EMBL	gene	3767	4765	.	-	.	ID=gene-LMJFC_010005100:CDS1;Name=LMJFC_010005100;gbkey=Gene;gene=LMJFC_010005100;gene_biotype=protein_coding;locus_tag=LMJFC_010005100:CDS1
+OU755535.1	EMBL	CDS	3767	4765	.	-	0	ID=cds-CAG9567064.1;Parent=gene-LMJFC_010005100:CDS1;Dbxref=NCBI_GP:CAG9567064.1;Name=CAG9567064.1;Note=source:CBMSO;gbkey=CDS;gene=LMJFC_010005100;locus_tag=LMJFC_010005100:CDS1;product=Protein_of_unknown_function_(DUF2946);protein_id=CAG9567064.1
+OU755535.1	EMBL	gene	4766	5117	.	-	.	ID=gene-LMJFC_010005100:5'UTR;Name=LMJFC_010005100;gbkey=Gene;gene=LMJFC_010005100;gene_biotype=other;locus_tag=LMJFC_010005100:5'UTR
+OU755535.1	EMBL	five_prime_UTR	4766	5117	.	-	.	ID=id-LMJFC_010005100:5'UTR;Parent=gene-LMJFC_010005100:5'UTR;Note=source:CBMSO;gbkey=5'UTR;gene=LMJFC_010005100;locus_tag=LMJFC_010005100:5'UTR
+LR812621.1	EMBL	gene	37	328	.	-	.	ID=gene-LDHU3_01.0010T;Name=LDHU3_01.0010;gbkey=Gene;gene=LDHU3_01.0010;gene_biotype=other;locus_tag=LDHU3_01.0010T
+LR812621.1	EMBL	mRNA	37	328	.	-	.	ID=rna-LDHU3_01.0010T;Parent=gene-LDHU3_01.0010T;Note=SL:ND|Alt SL:ND|PolyA:ND|Alt PolyA:ND%3B~source:CBMSO%3B~ID:LDHU3_01.0010T;gbkey=mRNA;gene=LDHU3_01.0010;locus_tag=LDHU3_01.0010T;product=N/D
+LR812621.1	EMBL	exon	37	328	.	-	.	ID=exon-LDHU3_01.0010T-1;Parent=rna-LDHU3_01.0010T;Note=SL:ND|Alt SL:ND|PolyA:ND|Alt PolyA:ND%3B~source:CBMSO%3B~ID:LDHU3_01.0010T;gbkey=mRNA;gene=LDHU3_01.0010;locus_tag=LDHU3_01.0010T;product=N/D
+LR812621.1	EMBL	gene	37	328	.	-	.	ID=gene-LDHU3_01.0010;Name=LDHU3_01.0010;gbkey=Gene;gene_biotype=other;locus_tag=LDHU3_01.0010
+FR796433.1	EMBL	gap	76256	76355	.	+	.	ID=id-FR796433.1:76256..76355;estimated_length=unknown;gbkey=gap
+LR812621.1	EMBL	gene	2169	5318	.	-	.	ID=gene-LDHU3_01.0030T;Name=LDHU3_01.0030;gbkey=Gene;gene=LDHU3_01.0030;gene_biotype=other;locus_tag=LDHU3_01.0030T
+LR812621.1	EMBL	mRNA	2169	5318	.	-	.	ID=rna-LDHU3_01.0030T;Parent=gene-LDHU3_01.0030T;Note=SL:395|Alt SL:5201(8)|5213(12)|5343(1)|5366(1)|5367(37)|PolyA:6|Alt PolyA:1670(1)|1765(5)|2171(4)|2253(3)%3B~source:CBMSO%3B~ID:LDHU3_01.0030T;gbkey=mRNA;gene=LDHU3_01.0030;locus_tag=LDHU3_01.0030T;product=Protein of unknown function (DUF2946)
+LR812621.1	EMBL	gene	2169	5318	.	-	.	ID=gene-LDHU3_01.0030;Name=LDHU3_01.0030;gbkey=Gene;gene_biotype=other;locus_tag=LDHU3_01.0030
+LR812621.1	EMBL	gene	2169	5318	.	-	.	ID=gene-LDHU3_01.0030:E1;Name=LDHU3_01.0030T;gbkey=Gene;gene=LDHU3_01.0030T;gene_biotype=other;locus_tag=LDHU3_01.0030:E1
+LR812621.1	EMBL	gene	2169	3961	.	-	.	ID=gene-LDHU3_01.0030:3UTR;Name=LDHU3_01.0030T;gbkey=Gene;gene=LDHU3_01.0030T;gene_biotype=other;locus_tag=LDHU3_01.0030:3UTR
+LR812621.1	EMBL	gene	3962	4963	.	-	.	ID=gene-LDHU3_01.0030:CDS1;Name=LDHU3_01.0030T;gbkey=Gene;gene=LDHU3_01.0030T;gene_biotype=protein_coding;locus_tag=LDHU3_01.0030:CDS1
+LR812621.1	EMBL	CDS	3962	4963	.	-	0	ID=cds-CAJ1985586.1;Parent=gene-LDHU3_01.0030:CDS1;Dbxref=NCBI_GP:CAJ1985586.1;Name=CAJ1985586.1;Note=source:CBMSO%3B~ID:LDHU3_01.0030T_cds1;gbkey=CDS;gene=LDHU3_01.0030T;locus_tag=LDHU3_01.0030:CDS1;product=Protein of unknown function (DUF2946);protein_id=CAJ1985586.1
+LR812621.1	EMBL	gene	4964	5318	.	-	.	ID=gene-LDHU3_01.0030:5UTR;Name=LDHU3_01.0030T;gbkey=Gene;gene=LDHU3_01.0030T;gene_biotype=other;locus_tag=LDHU3_01.0030:5UTR

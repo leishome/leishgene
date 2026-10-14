@@ -1,5 +1,5 @@
 // Fields of a gene that the table has no room for: EC, GO, Dbxref and the remaining GFF attributes.
-import { refUrl } from "./links.js?v=10";
+import { refUrl } from "./links.js?v=11";
 
 export function detailSections(gene) {
   const listed = (label, kind, values) => ({ label, items: (values || []).map((text) => ({ text, url: refUrl(kind, text) })) });

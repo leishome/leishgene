@@ -34,6 +34,9 @@
     <li>One row per gene. Transcripts, CDS and other child features are folded into their gene, and their product, EC, GO and
     Dbxref values are kept on it. Exons, UTRs, introns and similar rows are ignored.</li>
     <li>Features without a gene parent (a lone tRNA or CDS) are rows of their own.</li>
+    <li>Assembly gaps are not indexed. Some EMBL-derived GFFs (<code>GCA_916722125.1</code>, <code>GCA_900635355.2</code>)
+    write one gene row per feature of a locus (the locus, its transcript, <code>:E1</code>, <code>:CDS1</code>,
+    <code>:5'UTR</code>&hellip;); rows with the same name that overlap or touch are merged into one gene.</li>
     <li>Rows that repeat an ID are one record: a discontinuous pseudogene spans all its pieces, and the gene and rRNA rows of
     one Ld1S rRNA are merged.</li>
     <li>Coordinates are 1-based and as in the GFF; the chromosome is the sequence name of that GFF. The length is
@@ -62,6 +65,6 @@
   </ul>
 </main>
 <footer>Generated from the leishref catalog and its GFF annotations. <a href="./">Back to the search</a>.</footer>
-<script type="module" src="about.js?v=10"></script>
+<script type="module" src="about.js?v=11"></script>
 </body>
 </html>

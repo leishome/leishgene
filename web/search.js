@@ -1,12 +1,12 @@
-import { download, fileName, toBed, toDelimited } from "./export.js?v=10";
-import { binLengths, countBy, withOther } from "./stats.js?v=10";
-import { detailSections } from "./detail.js?v=10";
-import { highlight } from "./highlight.js?v=10";
-import { geneLength, geneLinks } from "./links.js?v=10";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=10";
-import { createShardCache } from "./shards.js?v=10";
-import { sortGenes } from "./sort.js?v=10";
-import { searchParams } from "./url.js?v=10";
+import { download, fileName, toBed, toDelimited } from "./export.js?v=11";
+import { binLengths, countBy, withOther } from "./stats.js?v=11";
+import { detailSections } from "./detail.js?v=11";
+import { highlight } from "./highlight.js?v=11";
+import { geneLength, geneLinks } from "./links.js?v=11";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=11";
+import { createShardCache } from "./shards.js?v=11";
+import { sortGenes } from "./sort.js?v=11";
+import { searchParams } from "./url.js?v=11";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;

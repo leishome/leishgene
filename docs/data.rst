@@ -37,3 +37,12 @@ Each ``manifest.json`` entry also records the annotation file (``gff``), where i
 ``about.html`` ("What is included" in the header and footer) is built from it and lists every genome with its
 strain, aliases, annotation file and gene count, the genomes that could not be searched, and the limits of the
 data.
+
+Variant rows of one gene
+------------------------
+
+Assembly gaps (``gap``) are not indexed. Some EMBL-derived GFFs write one ``gene`` row per feature of a locus
+(the locus, its transcript ``<locus>T``, ``:E1``, ``:CDS1``, ``:3'UTR``, ``:5'UTR``). Gene-level rows of the same
+sequence and strand whose names match (a trailing ``T`` is ignored) and that overlap or touch are merged into a
+single record: the row whose id is the name leads, the span is the union, products and cross-references are
+combined, a ``protein_coding`` biotype wins over ``other`` and a ``pseudogene`` variant makes the gene a pseudogene.

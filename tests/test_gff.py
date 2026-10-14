@@ -153,3 +153,55 @@ def test_augustus_dialect_type_attribute_and_extra_attrs():
 def test_seqid_map_renames_sequences():
     genes = parse_gff(FIX / "ld1s.gff", "G", seqid_map={"1": "CP022616.1", "27": "CP022642.1"})
     assert {g.seqid for g in genes} == {"CP022616.1", "CP022642.1", "10", "11"}
+
+
+def test_embl_variant_gene_rows_collapse_into_one_gene():
+    genes = by_id(parse_gff(FIX / "embl.gff", "G"))
+    assert {"LMJFC_010005100", "LDHU3_01.0010"} <= set(genes)
+    g = genes["LMJFC_010005100"]
+    assert (g.start, g.end, g.strand, g.type) == (1504, 5117, "-", "gene")
+    assert g.name == "LMJFC_010005100"
+    assert g.product.startswith("Protein_of_unknown_function")
+    assert g.dbxref == ["NCBI_GP:CAG9567064.1"]
+    assert g.attrs["gene_biotype"] == "protein_coding"  # the coding variant wins over "other"
+
+
+def test_assembly_gaps_are_not_genes():
+    assert all(g.type != "gap" for g in parse_gff(FIX / "embl.gff", "G"))
+
+
+def test_same_named_genes_apart_are_not_merged(tmp_path):
+    path = _write(
+        tmp_path,
+        "c1\tx\tgene\t1\t100\t.\t+\t.\tID=gene-A1;Name=dup\n"
+        "c1\tx\tgene\t500\t600\t.\t+\t.\tID=gene-A2;Name=dup\n"
+        "c1\tx\tgene\t50\t150\t.\t-\t.\tID=gene-A3;Name=dup\n",
+    )
+    assert sorted(g.id for g in parse_gff(path, "G")) == ["A1", "A2", "A3"]
+
+
+def test_variants_with_no_row_equal_to_the_name_keep_the_first_id(tmp_path):
+    path = _write(
+        tmp_path,
+        "c1\tx\tgene\t1\t100\t.\t+\t.\tID=gene-V:CDS1;Name=V\n"
+        "c1\tx\tgene\t101\t150\t.\t+\t.\tID=gene-V:5'UTR;Name=V\n",
+    )
+    (g,) = parse_gff(path, "G")
+    assert (g.id, g.start, g.end) == ("V:CDS1", 1, 150)
+
+
+def test_embl_locus_and_transcript_names_differing_by_a_trailing_t_merge():
+    genes = by_id(parse_gff(FIX / "embl.gff", "G"))
+    assert "LDHU3_01.0030" in genes and not any(i.endswith("T") or ":" in i for i in genes)
+    g = genes["LDHU3_01.0030"]
+    assert (g.start, g.end) == (2169, 5318) and g.dbxref == ["NCBI_GP:CAJ1985586.1"]
+
+
+def test_pseudogene_variant_makes_the_merged_gene_a_pseudogene(tmp_path):
+    path = _write(
+        tmp_path,
+        "c1\tx\tgene\t1\t1000\t.\t-\t.\tID=gene-P1;Name=P1;gene_biotype=other\n"
+        "c1\tx\tpseudogene\t300\t800\t.\t-\t.\tID=gene-P1:CDS1;Name=P1;gene_biotype=pseudogene\n",
+    )
+    (g,) = parse_gff(path, "G")
+    assert (g.id, g.type, g.start, g.end) == ("P1", "pseudogene", 1, 1000)

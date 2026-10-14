@@ -8,6 +8,7 @@ from urllib.parse import unquote
 GENE_TYPES = {"gene", "pseudogene", "ncRNA_gene", "protein_coding_gene"}
 #: Feature rows that never become, or fold into, a searchable record.
 IGNORED_TYPES = {
+    "gap",  # assembly gaps
     "exon",
     "region",
     "intron",
@@ -165,6 +166,72 @@ def _build(genome: str, row: _Row, members: list) -> Gene:
     return gene
 
 
+def _components(group: list) -> list:
+    """Split genes of one (sequence, strand, name) into runs that overlap or touch."""
+    runs: list = []
+    for gene in sorted(group, key=lambda g: (g.start, g.end)):
+        if runs and gene.start <= max(g.end for g in runs[-1]) + 1:
+            runs[-1].append(gene)
+        else:
+            runs.append([gene])
+    return runs
+
+
+def _merge(run: list, name: str) -> Gene:
+    """One record for variant rows of a gene: the one whose id is the name leads, the others fill in."""
+    lead = next((g for g in run if g.id == name), run[0])
+    merged = Gene(
+        lead.genome, lead.seqid, min(g.start for g in run), max(g.end for g in run), lead.strand, lead.type, lead.id
+    )
+    merged.name = lead.name
+    if any(g.type == "pseudogene" for g in run):
+        merged.type = "pseudogene"
+    for gene in [lead] + [g for g in run if g is not lead]:
+        merged.product = merged.product or gene.product
+        for field_ in ("ec", "go", "dbxref"):
+            for value in getattr(gene, field_):
+                if value not in getattr(merged, field_):
+                    getattr(merged, field_).append(value)
+        for key, value in gene.attrs.items():
+            if key not in merged.attrs or (key == "gene_biotype" and merged.attrs[key] == "other"):
+                merged.attrs[key] = value
+    return merged
+
+
+def _collapse_variants(genes: list) -> list:
+    """Merge gene-level rows that describe one gene.
+
+    Some GFFs (EMBL conversions) write a gene row per feature of a locus: the locus, its transcript,
+    ``:E1``, ``:CDS1``, ``:5'UTR``... All share the Name and overlap or touch, so they become one record.
+    """
+    names = {(g.seqid, g.strand, g.name) for g in genes}
+
+    def family(gene):
+        # EMBL conversions name the transcript variants "<locus>T" while the locus row is "<locus>"
+        base = gene.name[:-1]
+        return base if gene.name.endswith("T") and (gene.seqid, gene.strand, base) in names else gene.name
+
+    groups: dict = {}
+    for gene in genes:
+        if gene.type in GENE_TYPES:
+            groups.setdefault((gene.seqid, gene.strand, family(gene)), []).append(gene)
+    replacement: dict = {}  # id(first gene of a run) -> merged gene
+    dropped = set()
+    for (_, _, name), group in groups.items():
+        if len(group) < 2:
+            continue
+        for run in _components(group):
+            if len(run) > 1:
+                replacement[id(run[0])] = _merge(run, name)
+                dropped.update(id(g) for g in run[1:])
+    out = []
+    for gene in genes:
+        if id(gene) in dropped:
+            continue
+        out.append(replacement.get(id(gene), gene))
+    return out
+
+
 def parse_gff(path: Path, genome: str, seqid_map=None) -> list:
     """Parse a (possibly gzipped) GFF3 file into Gene records, in file order of their top-level rows.
 
@@ -191,4 +258,4 @@ def parse_gff(path: Path, genome: str, seqid_map=None) -> list:
             members.setdefault(id(by_id[row.id]), []).append(row)
         else:
             roots.append(row)
-    return [_build(genome, r, members.get(id(r), [])) for r in roots]
+    return _collapse_variants([_build(genome, r, members.get(id(r), [])) for r in roots])

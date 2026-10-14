@@ -1,5 +1,5 @@
 // Ordering of the result table; empty values go last whichever the direction.
-import { geneLength } from "./links.js?v=10";
+import { geneLength } from "./links.js?v=11";
 
 const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
