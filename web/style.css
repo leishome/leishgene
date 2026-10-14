@@ -55,3 +55,13 @@ button.bar-row:hover .bar-label, button.bar-row:focus-visible .bar-label { color
 mark { background: var(--accent-soft); color: var(--text); font-weight: 600; border-radius: 2px; padding: 0 1px; }
 #more { display: block; margin: 12px auto; padding: 6px 16px; }
 #more[hidden] { display: none; }
+.positions { margin: 0 0 16px; }
+.positions h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--text); }
+.positions select { font: inherit; font-size: 12px; max-width: 60%; padding: 2px 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--text); }
+#pos-plot svg { width: 100%; height: auto; max-width: 900px; display: block; }
+.pos-track { fill: var(--line); }
+.pos-tick { fill: var(--series-1); }
+.pos-label { fill: var(--text2); font-size: 11px; }
+.pos-axis { stroke: var(--line); stroke-width: 1; }
+.dt td a { color: var(--accent); }
+#status { min-width: 170px; }

@@ -1,12 +1,14 @@
-import { download, fileName, toBed, toDelimited } from "./export.js?v=11";
-import { binLengths, countBy, withOther } from "./stats.js?v=11";
-import { detailSections } from "./detail.js?v=11";
-import { highlight } from "./highlight.js?v=11";
-import { geneLength, geneLinks } from "./links.js?v=11";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=11";
-import { createShardCache } from "./shards.js?v=11";
-import { sortGenes } from "./sort.js?v=11";
-import { searchParams } from "./url.js?v=11";
+import { download, fileName, toBed, toDelimited } from "./export.js?v=13";
+import { binLengths, countBy, withOther } from "./stats.js?v=13";
+import { detailSections } from "./detail.js?v=13";
+import { highlight } from "./highlight.js?v=13";
+import { geneLength, geneLinks, genomeUrl } from "./links.js?v=13";
+import { layoutPositions, axisTicks } from "./positions.js?v=13";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=13";
+import { buildRelatedIndex, exactQuery, related } from "./related.js?v=13";
+import { createShardCache } from "./shards.js?v=13";
+import { sortGenes } from "./sort.js?v=13";
+import { searchParams } from "./url.js?v=13";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
@@ -20,6 +22,12 @@ let currentTotal = 0;
 let currentNamesOnly = false;
 let shown = LIMIT;
 const sort = { key: null, dir: "asc" };
+let positionsOpen = false;
+let relatedIndex = null;
+let seqlensPromise = null;
+
+const getRelated = () => (relatedIndex ||= buildRelatedIndex(names));
+const getSeqlens = () => (seqlensPromise ||= getJson("data/seqlens.json").catch(() => ({}))); // older exports have none
 
 async function getJson(url) {
   const response = await fetch(url);
@@ -82,6 +90,11 @@ function applyFilter(filter) {
   onQuery();
 }
 
+function setQuery(text) {
+  $("#q").value = text;
+  onQuery();
+}
+
 const quoteValue = (v) => (/\s/.test(v) ? `"${v}"` : v);
 
 const typeFilter = (t) => (t === "unknown" ? null : `type:${quoteValue(t)}`);
@@ -115,6 +128,46 @@ function showOverview() {
   box.hidden = false;
 }
 
+const link = (text, href, onClick) => {
+  const a = document.createElement("a");
+  a.textContent = text;
+  a.href = href;
+  if (onClick) {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      onClick();
+    });
+  } else {
+    a.target = "_blank";
+    a.rel = "noopener";
+  }
+  return a;
+};
+
+// Detail lines about the genome of a gene and about the same product / name in other genomes.
+function addGenomeLines(cell, gene) {
+  const gi = manifest.findIndex((m) => m.genome === gene.genome);
+  const add = (label, ...nodes) => {
+    const line = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = `${label}: `;
+    line.append(title, ...nodes);
+    cell.append(line);
+  };
+  const ncbi = genomeUrl(gene.genome);
+  add("Genome", link(genomeLabel(gene.genome), `?q=${encodeURIComponent(genomeFilter(gene.genome))}`, () => setQuery(genomeFilter(gene.genome))), ncbi ? ", " : "", ...(ncbi ? [link("NCBI assembly", ncbi)] : []));
+  if (gi < 0) return;
+  const found = related(getRelated(), gene, gi);
+  for (const [field, label] of [["product", "Same product"], ["name", "Same name"]]) {
+    const hit = found[field];
+    if (!hit) continue;
+    const top = hit.genomes.slice(0, 5).map(([g, n]) => `${genomeLabel(manifest[g].genome)} ${n}`).join(", ");
+    const more = hit.genomes.length > 5 ? `, ${hit.genomes.length - 5} more genomes` : "";
+    const query = exactQuery(field, gene[field]);
+    add(label, `${hit.total.toLocaleString("en")} other ${hit.total === 1 ? "gene" : "genes"} (${top}${more}) `, link("search them", `?q=${encodeURIComponent(query)}`, () => setQuery(query)));
+  }
+}
+
 // Expands or folds the row that lists EC, GO, Dbxref and attributes of a gene.
 function toggleDetail(tr, gene) {
   const next = tr.nextElementSibling;
@@ -146,6 +199,7 @@ function toggleDetail(tr, gene) {
     });
     cell.append(line);
   }
+  addGenomeLines(cell, gene);
   row.append(cell);
   tr.after(row);
   tr.setAttribute("aria-expanded", "true");
@@ -188,7 +242,18 @@ function fillTable(rows) {
     cells.forEach((text, i) => {
       const td = document.createElement("td");
       if (i === 3 || i === 4 || i === 6) td.className = "mono";
-      td.append(...cellContent(text, columns[i]));
+      if (i === 0) {
+        // the genome name searches that genome
+        const a = document.createElement("a");
+        a.href = `?q=${encodeURIComponent(genomeFilter(g.genome))}`;
+        a.title = "Show the genes of this genome";
+        a.append(...cellContent(text, columns[i]));
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          setQuery(genomeFilter(g.genome));
+        });
+        td.append(a);
+      } else td.append(...cellContent(text, columns[i]));
       tr.append(td);
     });
     const links = document.createElement("td");
@@ -229,6 +294,64 @@ function render(rows, total, namesOnly, stats) {
   fillTable(rows);
   renderCharts(stats, total);
   for (const b of document.querySelectorAll(".export")) b.disabled = total === 0;
+  if (positionsOpen && total > 0) drawPositions().catch((e) => ($("#pos-plot").textContent = `Could not draw positions: ${e.message}`));
+}
+
+const SVG = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs = {}, text) => {
+  const node = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (text !== undefined) node.textContent = text;
+  return node;
+};
+const formatBp = (n) => (n >= 1e6 ? `${n / 1e6} Mb` : n >= 1e3 ? `${n / 1e3} kb` : `${n}`);
+
+// Position plot: one row per sequence of the chosen genome, a tick at each match, all rows on one scale.
+async function drawPositions() {
+  const id = run;
+  const genes = await getMatches();
+  const lengths = await getSeqlens();
+  if (id !== run) return;
+  const byGenome = new Map();
+  for (const g of genes) byGenome.set(g.genome, [...(byGenome.get(g.genome) || []), g]);
+  const select = $("#pos-genome");
+  const previous = select.value;
+  const order = [...byGenome].sort((a, b) => b[1].length - a[1].length);
+  select.replaceChildren(...order.map(([genome, list]) => Object.assign(document.createElement("option"), { value: genome, textContent: `${genomeLabel(genome)} (${list.length})` })));
+  select.value = byGenome.has(previous) ? previous : order[0][0];
+  const { rows, scale, hidden } = layoutPositions(byGenome.get(select.value), lengths[select.value] || {}, 40);
+  const left = 130;
+  const width = 900;
+  const plot = width - left - 20;
+  const rowH = 22;
+  const height = rows.length * rowH + 34;
+  const svg = svgEl("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": `Positions of ${byGenome.get(select.value).length} matches on ${rows.length} sequences` });
+  const showTitles = rows.reduce((n, r) => n + r.ticks.length, 0) <= 3000; // one tooltip per tick is too heavy beyond that
+  rows.forEach((r, i) => {
+    const y = i * rowH + 4;
+    svg.append(svgEl("text", { x: left - 8, y: y + 11, "text-anchor": "end", class: "pos-label" }, r.seqid.length > 18 ? `${r.seqid.slice(0, 17)}…` : r.seqid));
+    svg.append(svgEl("rect", { x: left, y: y + 6, width: (r.length / scale) * plot, height: 3, class: "pos-track" }));
+    for (const t of r.ticks) {
+      const tick = svgEl("rect", { x: left + t.frac * (r.length / scale) * plot - 0.75, y: y, width: 1.5, height: 15, class: "pos-tick" });
+      if (showTitles) tick.append(svgEl("title", {}, `${t.id} ${r.seqid}:${t.start}-${t.end}`));
+      svg.append(tick);
+    }
+  });
+  const axisY = rows.length * rowH + 8;
+  for (const mark of axisTicks(scale).marks) {
+    const x = left + (mark / scale) * plot;
+    svg.append(svgEl("line", { x1: x, x2: x, y1: axisY, y2: axisY + 4, class: "pos-axis" }));
+    svg.append(svgEl("text", { x, y: axisY + 16, "text-anchor": "middle", class: "pos-label" }, formatBp(mark)));
+  }
+  $("#pos-plot").replaceChildren(svg);
+  $("#pos-note").textContent = hidden > 0 ? `${hidden} shorter sequences are not shown.` : "";
+}
+
+async function togglePositions() {
+  positionsOpen = !positionsOpen;
+  $("#show-positions").setAttribute("aria-pressed", String(positionsOpen));
+  $("#positions").hidden = !positionsOpen;
+  if (positionsOpen && getMatches) await drawPositions();
 }
 
 // Re-draws the table after a change of order or of the number of rows; a names-only search loads its genomes first.
@@ -336,6 +459,7 @@ async function search() {
 function clearExport() {
   getMatches = null;
   $("#charts").hidden = true;
+  $("#positions").hidden = true;
   for (const b of document.querySelectorAll(".export")) b.disabled = true;
 }
 
@@ -383,6 +507,8 @@ async function init() {
   $("#export-tsv").addEventListener("click", () => exportTable("\t", "tsv"));
   $("#export-csv").addEventListener("click", () => exportTable(",", "csv"));
   $("#export-bed").addEventListener("click", () => exportTable("\t", "bed"));
+  $("#show-positions").addEventListener("click", () => togglePositions().catch((e) => ($("#status").textContent = `Could not draw positions: ${e.message}`)));
+  $("#pos-genome").addEventListener("change", () => drawPositions());
   $("#more").addEventListener("click", () => {
     shown += LIMIT;
     rerender().catch((e) => ($("#status").textContent = `Could not load more rows: ${e.message}`));

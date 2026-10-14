@@ -58,13 +58,16 @@
     annotations that have them (Ld1S has GO terms, not EC numbers).</li>
     <li>UniProt links come from the UniProtKB cross-references of the GFF, and UniParc links are searches on the protein
     accession. Genes without such references get no link.</li>
-    <li>No orthology or cross-genome grouping yet, and no sequences.</li>
+    <li>No orthology and no sequences. "Same product" and "same name" in the detail row only compare exact text, so they
+    group genes of one annotation style and miss renamed ones.</li>
+    <li>The position plot takes the sequence lengths from the GFF; when it declares none (Ld1S), a sequence is drawn
+    up to its last gene.</li>
     <li><b>Ld1S:</b> the assembly GCA_002243465.1 has no annotation at NCBI. The annotation shown here is the
     <code>Ld1S.gff</code> kept in the repository, whose sequences (1&ndash;36, maxi) were renamed to the NCBI names
     (CP022616.1&ndash;CP022652.1) of the same sequence. Its gene ids and descriptions are those of that file.</li>
   </ul>
 </main>
 <footer>Generated from the leishref catalog and its GFF annotations. <a href="./">Back to the search</a>.</footer>
-<script type="module" src="about.js?v=11"></script>
+<script type="module" src="about.js?v=13"></script>
 </body>
 </html>

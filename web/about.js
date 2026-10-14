@@ -1,3 +1,5 @@
+import { genomeUrl } from "./links.js?v=13";
+
 // "What is included": built from data/manifest.json, so it always describes the data the site was built with.
 const REASONS = {
   missing: "its GFF was not in the local cache when the site was built",
@@ -36,7 +38,7 @@ async function main() {
   document.querySelector("#summary").textContent = `${s.searchable} genomes and ${s.genes.toLocaleString("en")} genes are searchable.`;
   const table = el("table", undefined, "dt");
   const head = el("tr");
-  for (const h of ["genome", "species", "strain", "aliases", "annotation file", "source", "genes"]) head.append(el("th", h));
+  for (const h of ["genome", "species", "strain", "aliases", "annotation file", "source", "genes", "links"]) head.append(el("th", h));
   const thead = el("thead");
   thead.append(head);
   table.append(thead);
@@ -45,6 +47,18 @@ async function main() {
     const tr = el("tr");
     const cells = [m.genome, m.species || "", m.strain || "", (m.aliases || []).join(", "), m.gff || "", m.source || "", m.genes.toLocaleString("en")];
     for (const [i, text] of cells.entries()) tr.append(el("td", text, i === 0 || i === 4 ? "mono" : undefined));
+    const links = el("td");
+    const search = el("a", "search");
+    search.href = `./?q=${encodeURIComponent(`genome:${m.genome}`)}`;
+    links.append(search);
+    if (genomeUrl(m.genome)) {
+      const ncbi = el("a", "NCBI");
+      ncbi.href = genomeUrl(m.genome);
+      ncbi.target = "_blank";
+      ncbi.rel = "noopener";
+      links.append(", ", ncbi);
+    }
+    tr.append(links);
     body.append(tr);
   }
   table.append(body);

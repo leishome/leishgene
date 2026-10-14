@@ -1192,5 +1192,89 @@
    ]
   },
   "match": false
+ },
+ {
+  "query": "product:/^a\\.b \\(x\\)\\/y \\[z\\]$/",
+  "gene": {
+   "genome": "G1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "a.b (x)/y [z]",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   }
+  },
+  "match": true
+ },
+ {
+  "query": "product:/^b \\(x\\)\\/y \\[z\\]$/",
+  "gene": {
+   "genome": "G1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "a.b (x)/y [z]",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   }
+  },
+  "match": false
+ },
+ {
+  "query": "product:/^a\\.b$/",
+  "gene": {
+   "genome": "G1",
+   "species": "Leishmania donovani",
+   "seqid": "c1",
+   "start": 1,
+   "end": 9,
+   "strand": "+",
+   "type": "gene",
+   "id": "LdBPK_270010",
+   "name": "LdBPK_270010",
+   "product": "a.b (x)/y [z]",
+   "ec": [
+    "2.7.11.1"
+   ],
+   "go": [
+    "GO:0004672"
+   ],
+   "dbxref": [
+    "GeneID:123"
+   ],
+   "attrs": {
+    "gbkey": "Gene"
+   }
+  },
+  "match": false
  }
 ]

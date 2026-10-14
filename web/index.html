@@ -27,10 +27,16 @@
   <div class="bar">
     <span id="status">Loading index…</span>
     <span class="actions">Export all matches as <input id="export-name" type="text" placeholder="leishgene_&lt;query&gt;" aria-label="Export file name" size="22"> <button id="export-tsv" class="export" type="button" disabled>TSV</button> <button id="export-csv" class="export" type="button" disabled>CSV</button> <button id="export-bed" class="export" type="button" disabled>BED</button></span>
+    <button id="show-positions" class="export" type="button" aria-pressed="false" disabled>Positions</button>
     <label><input id="all" type="checkbox"> Search all annotation fields (downloads every genome)</label>
   </div>
   <div id="error" class="err" hidden></div>
   <section id="charts" class="charts" hidden></section>
+  <section id="positions" class="positions" hidden>
+    <h3>Positions of the matches <label>in <select id="pos-genome"></select></label></h3>
+    <div id="pos-plot"></div>
+    <p id="pos-note" class="notes"></p>
+  </section>
   <table class="dt" id="results" hidden>
     <thead><tr><th data-sort="genome" aria-sort="none" tabindex="0">genome</th><th data-sort="species" aria-sort="none" tabindex="0">species</th><th data-sort="strain" aria-sort="none" tabindex="0">strain</th><th data-sort="location" aria-sort="none" tabindex="0">location</th><th data-sort="length" aria-sort="none" tabindex="0">length</th><th data-sort="strand" aria-sort="none" tabindex="0">strand</th><th data-sort="id" aria-sort="none" tabindex="0">id</th><th data-sort="type" aria-sort="none" tabindex="0">type</th><th data-sort="product" aria-sort="none" tabindex="0">product</th><th>links</th></tr></thead>
     <tbody></tbody>
@@ -39,6 +45,6 @@
   <p id="missing" class="notes"></p>
 </main>
 <footer>Generated from the leishref catalog and its GFF annotations. <a href="about.html">What is included</a>.</footer>
-<script type="module" src="search.js?v=11"></script>
+<script type="module" src="search.js?v=13"></script>
 </body>
 </html>

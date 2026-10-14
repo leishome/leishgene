@@ -1,6 +1,11 @@
 // Derived values for the result table and the exports: gene length and UniProt / UniParc links.
 const UNIPROT = "https://www.uniprot.org";
 
+// NCBI page of an assembly accession; other genome identifiers have none.
+export function genomeUrl(id) {
+  return /^GC[AF]_\d+\.\d+$/.test(id) ? `https://www.ncbi.nlm.nih.gov/datasets/genome/${id}/` : null;
+}
+
 export function geneLength(gene) {
   return gene.start === undefined || gene.end === undefined ? "" : gene.end - gene.start + 1;
 }

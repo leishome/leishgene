@@ -232,6 +232,33 @@ def _collapse_variants(genes: list) -> list:
     return out
 
 
+SEQUENCE_TYPES = {"region", "chromosome", "contig", "supercontig", "scaffold"}
+
+
+def read_seqlens(path: Path, seqid_map=None) -> dict:
+    """Sequence lengths a GFF declares: ``##sequence-region`` lines and region-like rows (name -> length)."""
+    lengths: dict = {}
+    rename = seqid_map or {}
+
+    def note(seqid, end):
+        seqid = rename.get(seqid, seqid)
+        lengths[seqid] = max(lengths.get(seqid, 0), end)
+
+    with _open(path) as handle:
+        for line in handle:
+            if line.startswith("##FASTA"):
+                break
+            if line.startswith("##sequence-region"):
+                parts = line.split()
+                if len(parts) >= 4 and parts[3].isdigit():
+                    note(parts[1], int(parts[3]))
+            elif not line.startswith("#"):
+                cols = line.rstrip("\n").split("\t")
+                if len(cols) >= 5 and cols[2] in SEQUENCE_TYPES and cols[4].isdigit():
+                    note(cols[0], int(cols[4]))
+    return lengths
+
+
 def parse_gff(path: Path, genome: str, seqid_map=None) -> list:
     """Parse a (possibly gzipped) GFF3 file into Gene records, in file order of their top-level rows.
 

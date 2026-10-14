@@ -33,5 +33,7 @@ def export_site(index_dir: Path, site_data_dir: Path) -> None:
     index_dir, site_data_dir = Path(index_dir), Path(site_data_dir)
     site_data_dir.mkdir(parents=True, exist_ok=True)
     wanted = ["manifest.json", "names.json"] + [f"{e['genome']}.json" for e in manifest if e["status"] != "missing"]
+    if (index_dir / "seqlens.json").is_file():  # absent from indexes built before the position plot
+        wanted.append("seqlens.json")
     for name in wanted:
         shutil.copyfile(index_dir / name, site_data_dir / name)

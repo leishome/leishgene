@@ -47,3 +47,11 @@ test("refUrl maps known database references and leaves the others plain", () => 
   assert.equal(refUrl("ec", "2.7.11.1"), "https://enzyme.expasy.org/EC/2.7.11.1");
   assert.equal(refUrl("go", "free text"), null);
 });
+
+import { genomeUrl } from "../links.js";
+
+test("genomeUrl links assembly accessions to NCBI and nothing else", () => {
+  assert.equal(genomeUrl("GCA_002243465.1"), "https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_002243465.1/");
+  assert.equal(genomeUrl("GCF_000002725.2"), "https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000002725.2/");
+  assert.equal(genomeUrl("Ltropica.CDC216"), null);
+});

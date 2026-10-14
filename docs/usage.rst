@@ -45,3 +45,9 @@ restore the index order); "Show N more" adds rows beyond the first 100; the word
 genome, strain, id and product cells. Without a query the page shows the whole database (genes per genome and by
 type); a click on a genome bar searches that genome. A third chart gives the gene length of the matches, and the BED
 button (or ``leishgene search QUERY -o hits.bed``) exports the coordinates of all matches for genome browsers.
+
+Three more tools work on a result. The detail row of a gene names its genome (a link that searches it, and the NCBI
+assembly page for GCA_/GCF_ accessions) and counts the genes of other genomes with the same exact product or name,
+per genome, with a "search them" link that runs the exact query (``product:/^beta tubulin$/``). The genome
+cell of a table row searches that genome. The Positions button draws the matches along the sequences of one genome
+(chosen in a list), all rows on one scale, with a tooltip per tick.
