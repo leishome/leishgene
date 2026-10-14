@@ -45,16 +45,34 @@ jobs:
       - name: Key for the leishref download cache
         id: genomes
         run: echo "hash=$(leishgene info --list-gff-genomes | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-      - name: Cache leishref downloads
-        uses: actions/cache@v4
+      - name: Restore the leishref cache
+        # the cache holds the GFFs only (see below); a new key per run lets a partly filled cache be saved
+        uses: actions/cache/restore@v4
         with:
           path: ~/.config/leishref
-          key: leishref-${{ steps.genomes.outputs.hash }}
+          key: leishref-${{ steps.genomes.outputs.hash }}-${{ github.run_id }}
+          restore-keys: leishref-${{ steps.genomes.outputs.hash }}-
       - name: Install the genomes that have a GFF
+        # NCBI's download service fails now and then, and `leishref install` reports it as "NCBI has no data":
+        # retry each genome, skip the ones already cached, and keep only the GFF (leishgene never reads the FASTA)
         run: |
           for genome in $(leishgene info --list-gff-genomes); do
-            leishref install "$genome" --alias "$genome" --no-link
+            dir="$HOME/.config/leishref/$genome"
+            if ls "$dir"/*.gff > /dev/null 2>&1; then continue; fi
+            for attempt in 1 2 3 4; do
+              leishref install "$genome" --alias "$genome" --no-link && break
+              if [ "$attempt" = 4 ]; then echo "::error::could not install $genome"; exit 1; fi
+              echo "attempt $attempt failed for $genome, retrying"
+              sleep $((attempt * 30))
+            done
+            rm -f "$dir"/*.fna "$dir"/*.fna.gz "$dir"/*.fai
           done
+      - name: Save the leishref cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.config/leishref
+          key: leishref-${{ steps.genomes.outputs.hash }}-${{ github.run_id }}
       - name: Build index
         # data/extra/gff_overrides.yaml adds GFFs the catalog lacks (Ld1S) and is read automatically
         run: |
