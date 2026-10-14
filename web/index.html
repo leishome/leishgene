@@ -12,6 +12,7 @@
   <div class="inner">
     <div class="title"><h1>Leishgene</h1><p>Search genes and annotations across <i>Leishmania</i> genomes</p></div>
     <nav>
+      <a class="btn" href="about.html">What is included</a>
       <a class="btn" href="https://github.com/leishome/leishgene" target="_blank" rel="noopener">GitHub</a>
       <button id="theme" type="button" aria-label="Toggle dark mode">Theme</button>
     </nav>
@@ -25,18 +26,19 @@
   <input id="q" type="search" placeholder="Search genes… (e.g. kinase species:donovani, /^LdBPK_27/, type:tRNA)" autofocus aria-label="Search genes">
   <div class="bar">
     <span id="status">Loading index…</span>
-    <span class="actions">Export all matches as <input id="export-name" type="text" placeholder="leishgene_&lt;query&gt;" aria-label="Export file name" size="22"> <button id="export-tsv" class="export" type="button" disabled>TSV</button> <button id="export-csv" class="export" type="button" disabled>CSV</button></span>
+    <span class="actions">Export all matches as <input id="export-name" type="text" placeholder="leishgene_&lt;query&gt;" aria-label="Export file name" size="22"> <button id="export-tsv" class="export" type="button" disabled>TSV</button> <button id="export-csv" class="export" type="button" disabled>CSV</button> <button id="export-bed" class="export" type="button" disabled>BED</button></span>
     <label><input id="all" type="checkbox"> Search all annotation fields (downloads every genome)</label>
   </div>
   <div id="error" class="err" hidden></div>
   <section id="charts" class="charts" hidden></section>
   <table class="dt" id="results" hidden>
-    <thead><tr><th>genome</th><th>species</th><th>strain</th><th>location</th><th>length</th><th>strand</th><th>id</th><th>type</th><th>product</th><th>links</th></tr></thead>
+    <thead><tr><th data-sort="genome" aria-sort="none" tabindex="0">genome</th><th data-sort="species" aria-sort="none" tabindex="0">species</th><th data-sort="strain" aria-sort="none" tabindex="0">strain</th><th data-sort="location" aria-sort="none" tabindex="0">location</th><th data-sort="length" aria-sort="none" tabindex="0">length</th><th data-sort="strand" aria-sort="none" tabindex="0">strand</th><th data-sort="id" aria-sort="none" tabindex="0">id</th><th data-sort="type" aria-sort="none" tabindex="0">type</th><th data-sort="product" aria-sort="none" tabindex="0">product</th><th>links</th></tr></thead>
     <tbody></tbody>
   </table>
+  <button id="more" class="more" type="button" hidden>Show more</button>
   <p id="missing" class="notes"></p>
 </main>
-<footer>Generated from the leishref catalog and its GFF annotations.</footer>
-<script type="module" src="search.js?v=9"></script>
+<footer>Generated from the leishref catalog and its GFF annotations. <a href="about.html">What is included</a>.</footer>
+<script type="module" src="search.js?v=10"></script>
 </body>
 </html>

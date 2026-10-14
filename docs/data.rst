@@ -31,3 +31,9 @@ renames the GFF sequences to the names of the catalog FASTA, so the coordinates 
 attributes are AUGUSTUS-style ``key="value"``: ``gene_id`` becomes the id, ``combinedAnnotation`` the product,
 ``BP``/``MF``/``CC`` are merged into the GO terms (``NA`` dropped) and ``type`` (pseudogene, snoRNA, ...) the
 record type. Rows repeating an id, such as the gene and rRNA rows of one rRNA, are one record.
+
+Each ``manifest.json`` entry also records the annotation file (``gff``), where it came from (``source``:
+``leishref catalog`` or ``local override``) and the number of genes per type (``types``). The website's
+``about.html`` ("What is included" in the header and footer) is built from it and lists every genome with its
+strain, aliases, annotation file and gene count, the genomes that could not be searched, and the limits of the
+data.

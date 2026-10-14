@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leishgene: what is included</title>
+<script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="title"><h1>Leishgene</h1><p>What is included</p></div>
+    <nav>
+      <a class="btn" href="./">Search</a>
+      <a class="btn" href="https://github.com/leishome/leishgene" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="about">
+  <h2>Scope</h2>
+  <p id="summary">Loading…</p>
+  <p>Leishgene indexes the genomes of the <a href="https://github.com/leishome/leishref" target="_blank" rel="noopener">leishref</a>
+  catalog that record a GFF annotation, plus the annotations listed in <code>data/extra/gff_overrides.yaml</code> of the
+  repository (currently Ld1S). Genomes of the catalog without an annotation are not searchable.</p>
+
+  <h2>Genomes</h2>
+  <div id="genomes">Loading…</div>
+  <h3 id="left-out-title" hidden>Listed but not searchable</h3>
+  <ul id="left-out" hidden></ul>
+
+  <h2>What a result is</h2>
+  <ul>
+    <li>One row per gene. Transcripts, CDS and other child features are folded into their gene, and their product, EC, GO and
+    Dbxref values are kept on it. Exons, UTRs, introns and similar rows are ignored.</li>
+    <li>Features without a gene parent (a lone tRNA or CDS) are rows of their own.</li>
+    <li>Rows that repeat an ID are one record: a discontinuous pseudogene spans all its pieces, and the gene and rRNA rows of
+    one Ld1S rRNA are merged.</li>
+    <li>Coordinates are 1-based and as in the GFF; the chromosome is the sequence name of that GFF. The length is
+    <code>end - start + 1</code> in bp, gaps included.</li>
+  </ul>
+
+  <h2>What can be searched</h2>
+  <ul>
+    <li>Bare words match id, name, product, EC, GO, Dbxref, the remaining GFF attributes, and the genome, strain, alias and
+    species names.</li>
+    <li><code>id name product type species genome ec go dbxref</code> restrict a term to one field;
+    <code>genome:</code> also matches the strain and the aliases.</li>
+    <li>The names index answers id/name/product searches at once; other fields load the genome files first.</li>
+  </ul>
+
+  <h2>Known limits</h2>
+  <ul>
+    <li>Most catalog GFFs carry no EC numbers or GO terms, so <code>ec:</code> and <code>go:</code> only find genes of
+    annotations that have them (Ld1S has GO terms, not EC numbers).</li>
+    <li>UniProt links come from the UniProtKB cross-references of the GFF, and UniParc links are searches on the protein
+    accession. Genes without such references get no link.</li>
+    <li>No orthology or cross-genome grouping yet, and no sequences.</li>
+    <li><b>Ld1S:</b> the assembly GCA_002243465.1 has no annotation at NCBI. The annotation shown here is the
+    <code>Ld1S.gff</code> kept in the repository, whose sequences (1&ndash;36, maxi) were renamed to the NCBI names
+    (CP022616.1&ndash;CP022652.1) of the same sequence. Its gene ids and descriptions are those of that file.</li>
+  </ul>
+</main>
+<footer>Generated from the leishref catalog and its GFF annotations. <a href="./">Back to the search</a>.</footer>
+<script type="module" src="about.js?v=10"></script>
+</body>
+</html>

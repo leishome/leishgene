@@ -62,3 +62,9 @@ def test_length_and_uniprot_columns(tmp_path):
         header, row = list(csv.reader(handle, delimiter="\t"))
     cols = dict(zip(header, row))
     assert cols["length"] == "86" and cols["uniprot"] == "E9ABZ0;P1" and cols["product"].startswith("kinase, ")
+
+
+def test_write_bed(tmp_path):
+    out = tmp_path / "hits.bed"
+    write_table([GENE, dict(GENE, id="g 2", start=1, end=2, strand=None)], out)
+    assert out.read_text() == "c1\t4\t90\tg1\t0\t-\nc1\t0\t2\tg_2\t0\t.\n"

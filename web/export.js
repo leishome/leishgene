@@ -1,4 +1,4 @@
-import { geneLength, uniprotAccessions } from "./links.js?v=9";
+import { geneLength, uniprotAccessions } from "./links.js?v=10";
 // Table export of search hits; same columns and quoting as leishgene/table.py.
 export const COLUMNS = ["genome", "species", "strain", "seqid", "start", "end", "length", "strand", "id", "name", "type", "product", "ec", "go", "dbxref", "uniprot"];
 const LIST_COLUMNS = new Set(["ec", "go", "dbxref", "uniprot"]);
@@ -28,6 +28,11 @@ const sanitise = (text) => text.trim().replace(/[^\w.-]+/g, "_").replace(/^_+|_+
 
 // Download name: the typed one (extension forced to the clicked format), else one derived from the query.
 export function fileName(typed, query, ext) {
-  const name = sanitise(typed).replace(/\.(tsv|csv)$/i, "");
+  const name = sanitise(typed).replace(/\.(tsv|csv|bed)$/i, "");
   return `${name || `leishgene_${sanitise(query).slice(0, 40) || "search"}`}.${ext}`;
+}
+
+// BED6: 0-based start, the gene id as name (whitespace becomes "_"), score 0, strand or ".".
+export function toBed(genes) {
+  return genes.map((g) => `${g.seqid}\t${g.start - 1}\t${g.end}\t${String(g.id).split(/\s+/).join("_")}\t0\t${g.strand || "."}\n`).join("");
 }

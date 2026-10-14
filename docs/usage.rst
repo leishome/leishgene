@@ -39,3 +39,9 @@ A click (or Enter) on a table row unfolds the EC numbers, GO terms, Dbxref value
 the gene; EC, GO, GeneID, InterPro, PFAM, PDB and UniProt references are links. The address bar always holds the
 current search (``?q=...&all=1``), so a search can be shared by copying the URL. The "links" column adds an NCBI
 Gene link from the ``GeneID`` Dbxref.
+
+Further table features: click a column header to sort all matches by it (click again for descending, a third time to
+restore the index order); "Show N more" adds rows beyond the first 100; the words of the query are highlighted in the
+genome, strain, id and product cells. Without a query the page shows the whole database (genes per genome and by
+type); a click on a genome bar searches that genome. A third chart gives the gene length of the matches, and the BED
+button (or ``leishgene search QUERY -o hits.bed``) exports the coordinates of all matches for genome browsers.

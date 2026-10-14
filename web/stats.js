@@ -16,3 +16,23 @@ export function withOther(entries, n) {
   const rest = entries.slice(n);
   return { shown: entries.slice(0, n), other: { count: rest.reduce((s, e) => s + e[1], 0), groups: rest.length } };
 }
+
+const LENGTH_BINS = [
+  ["< 500 bp", 500],
+  ["500 bp – 1 kb", 1000],
+  ["1 – 2 kb", 2000],
+  ["2 – 4 kb", 4000],
+  ["4 – 8 kb", 8000],
+  ["≥ 8 kb", Infinity],
+];
+
+// [[label, count]] in length order, empty bins kept so that the shape of the distribution reads at a glance.
+export function binLengths(genes) {
+  const counts = LENGTH_BINS.map(([label]) => [label, 0]);
+  for (const g of genes) {
+    if (g.start === undefined || g.end === undefined) continue;
+    const length = g.end - g.start + 1;
+    counts[LENGTH_BINS.findIndex(([, limit]) => length < limit)][1]++;
+  }
+  return counts;
+}

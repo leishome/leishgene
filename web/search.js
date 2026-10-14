@@ -1,10 +1,12 @@
-import { download, fileName, toDelimited } from "./export.js?v=9";
-import { countBy, withOther } from "./stats.js?v=9";
-import { detailSections } from "./detail.js?v=9";
-import { geneLength, geneLinks } from "./links.js?v=9";
-import { needsShards, parseQuery, QueryError } from "./query.js?v=9";
-import { createShardCache } from "./shards.js?v=9";
-import { searchParams } from "./url.js?v=9";
+import { download, fileName, toBed, toDelimited } from "./export.js?v=10";
+import { binLengths, countBy, withOther } from "./stats.js?v=10";
+import { detailSections } from "./detail.js?v=10";
+import { highlight } from "./highlight.js?v=10";
+import { geneLength, geneLinks } from "./links.js?v=10";
+import { needsShards, parseQuery, QueryError } from "./query.js?v=10";
+import { createShardCache } from "./shards.js?v=10";
+import { sortGenes } from "./sort.js?v=10";
+import { searchParams } from "./url.js?v=10";
 
 const $ = (s) => document.querySelector(s);
 const LIMIT = 100;
@@ -12,7 +14,12 @@ const LIMIT = 100;
 let manifest = [];
 let names = [];
 let run = 0;
-let getMatches = null; // resolves every match of the current search (the table shows only LIMIT rows)
+let getMatches = null; // resolves every match of the current search (the table shows only `shown` rows)
+let currentQuery = null;
+let currentTotal = 0;
+let currentNamesOnly = false;
+let shown = LIMIT;
+const sort = { key: null, dir: "asc" };
 
 async function getJson(url) {
   const response = await fetch(url);
@@ -33,7 +40,7 @@ const genomeLabel = (id) => {
 };
 
 // One horizontal bar chart: single series, so no legend; each bar adds a filter to the query when clicked.
-function barChart(title, entries, maxBars, labelOf, filterOf) {
+function barChart(title, entries, maxBars, labelOf, filterOf, noun = "matches") {
   const { shown, other } = withOther(entries, maxBars);
   const max = Math.max(...entries.map((e) => e[1]));
   const box = document.createElement("div");
@@ -64,8 +71,8 @@ function barChart(title, entries, maxBars, labelOf, filterOf) {
     el.append(name, track, value);
     box.append(el);
   };
-  for (const [key, count] of shown) row(labelOf(key), count, `${labelOf(key)}: ${count.toLocaleString("en")} matches` + (filterOf ? " (click to filter)" : ""), filterOf ? filterOf(key) : null);
-  if (other) row(`${other.groups} others`, other.count, `${other.groups} more: ${other.count.toLocaleString("en")} matches`);
+  for (const [key, count] of shown) row(labelOf(key), count, `${labelOf(key)}: ${count.toLocaleString("en")} ${noun}` + (filterOf ? " (click to filter)" : ""), filterOf ? filterOf(key) : null);
+  if (other) row(`${other.groups} others`, other.count, `${other.groups} more: ${other.count.toLocaleString("en")} ${noun}`);
   return box;
 }
 
@@ -77,13 +84,35 @@ function applyFilter(filter) {
 
 const quoteValue = (v) => (/\s/.test(v) ? `"${v}"` : v);
 
+const typeFilter = (t) => (t === "unknown" ? null : `type:${quoteValue(t)}`);
+const genomeFilter = (id) => `genome:${quoteValue(id)}`;
+
 function renderCharts(stats, total) {
   const box = $("#charts");
   box.replaceChildren();
   box.hidden = total === 0 || !stats;
   if (box.hidden) return;
-  box.append(barChart("Matches per genome", stats.genomes, 12, genomeLabel, (id) => `genome:${quoteValue(id)}`));
-  if (stats.types) box.append(barChart("Matches by type", stats.types, 10, (t) => t, (t) => (t === "unknown" ? null : `type:${quoteValue(t)}`)));
+  box.append(barChart("Matches per genome", stats.genomes, 12, genomeLabel, genomeFilter));
+  if (stats.types) box.append(barChart("Matches by type", stats.types, 10, (t) => t, typeFilter));
+  if (stats.lengths) box.append(barChart("Gene length of the matches", stats.lengths, 6, (label) => label, null));
+}
+
+// Before any search: the whole database, from the manifest. A click on a genome bar searches that genome.
+function showOverview() {
+  const ok = manifest.filter((m) => m.status === "ok");
+  const box = $("#charts");
+  box.replaceChildren();
+  if (ok.length === 0) {
+    box.hidden = true;
+    return;
+  }
+  const perGenome = ok.map((m) => [m.genome, m.genes]).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+  box.append(barChart("Genes per genome", perGenome, 12, genomeLabel, genomeFilter, "genes"));
+  const types = new Map();
+  for (const m of ok) for (const [t, n] of Object.entries(m.types || {})) types.set(t, (types.get(t) || 0) + n);
+  const byType = [...types].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+  if (byType.length > 0) box.append(barChart("Genes by type", byType, 10, (t) => t, typeFilter, "genes"));
+  box.hidden = false;
 }
 
 // Expands or folds the row that lists EC, GO, Dbxref and attributes of a gene.
@@ -122,9 +151,27 @@ function toggleDetail(tr, gene) {
   tr.setAttribute("aria-expanded", "true");
 }
 
-function render(rows, total, namesOnly, stats) {
+// Highlighted text for a table column: only the query terms that can match that column count.
+const COLUMN_FIELDS = { genome: ["genome"], species: ["species"], strain: ["genome"], id: ["id", "name"], product: ["product"] };
+
+function cellContent(text, column) {
+  const fields = COLUMN_FIELDS[column];
+  const patterns = currentQuery && fields ? currentQuery.terms.filter((t) => t.field === null || fields.includes(t.field)).map((t) => t.pattern) : [];
+  const nodes = [];
+  for (const part of highlight(text, patterns)) {
+    if (part.hit) {
+      const mark = document.createElement("mark");
+      mark.textContent = part.text;
+      nodes.push(mark);
+    } else nodes.push(part.text);
+  }
+  return nodes;
+}
+
+function fillTable(rows) {
   const body = $("#results tbody");
   body.replaceChildren();
+  const columns = ["genome", "species", "strain", "location", "length", "strand", "id", "type", "product"];
   for (const g of rows) {
     const tr = document.createElement("tr");
     const cells = [
@@ -141,7 +188,7 @@ function render(rows, total, namesOnly, stats) {
     cells.forEach((text, i) => {
       const td = document.createElement("td");
       if (i === 3 || i === 4 || i === 6) td.className = "mono";
-      td.textContent = text;
+      td.append(...cellContent(text, columns[i]));
       tr.append(td);
     });
     const links = document.createElement("td");
@@ -169,11 +216,39 @@ function render(rows, total, namesOnly, stats) {
     body.append(tr);
   }
   $("#results").hidden = rows.length === 0;
+  $("#more").hidden = currentTotal <= rows.length;
+  $("#more").textContent = `Show ${Math.min(LIMIT, currentTotal - rows.length)} more`;
+  let status = currentTotal > rows.length ? `${currentTotal} matches, showing ${rows.length}` : `${currentTotal} match(es)`;
+  if (currentTotal === 0 && currentNamesOnly) status += " in id/name/product; tick 'search all annotation fields' to search EC, GO, Dbxref and attributes";
+  $("#status").textContent = status;
+}
+
+function render(rows, total, namesOnly, stats) {
+  currentTotal = total;
+  currentNamesOnly = namesOnly;
+  fillTable(rows);
   renderCharts(stats, total);
   for (const b of document.querySelectorAll(".export")) b.disabled = total === 0;
-  let status = total > rows.length ? `${total} matches, showing ${rows.length}` : `${total} match(es)`;
-  if (total === 0 && namesOnly) status += " in id/name/product; tick 'search all annotation fields' to search EC, GO, Dbxref and attributes";
-  $("#status").textContent = status;
+}
+
+// Re-draws the table after a change of order or of the number of rows; a names-only search loads its genomes first.
+async function rerender() {
+  if (!getMatches) return;
+  const id = run;
+  $("#status").textContent = "Loading…";
+  const genes = await getMatches();
+  if (id !== run) return;
+  fillTable((sort.key ? sortGenes(genes, sort.key, sort.dir) : genes).slice(0, shown));
+}
+
+function setSort(key) {
+  if (sort.key === key && sort.dir === "asc") sort.dir = "desc";
+  else if (sort.key === key) sort.key = null;
+  else Object.assign(sort, { key, dir: "asc" });
+  for (const th of document.querySelectorAll("th[data-sort]")) {
+    th.setAttribute("aria-sort", th.dataset.sort === sort.key ? (sort.dir === "asc" ? "ascending" : "descending") : "none");
+  }
+  rerender().catch((e) => ($("#status").textContent = `Could not sort: ${e.message}`));
 }
 
 async function search() {
@@ -189,15 +264,22 @@ async function search() {
     error.textContent = e.message;
     error.hidden = false;
     $("#results").hidden = true;
+    $("#more").hidden = true;
     clearExport();
     return;
   }
   if (query.terms.length === 0) {
     $("#results").hidden = true;
+    $("#more").hidden = true;
     clearExport();
+    showOverview();
     $("#status").textContent = `${names.length} genes in ${manifest.filter((m) => m.status === "ok").length} genomes`;
     return;
   }
+  currentQuery = query;
+  shown = LIMIT;
+  Object.assign(sort, { key: null, dir: "asc" });
+  for (const th of document.querySelectorAll("th[data-sort]")) th.setAttribute("aria-sort", "none");
   const wantShards = needsShards(query, $("#all").checked);
   let hits = [];
   let stats = null;
@@ -219,7 +301,7 @@ async function search() {
       }
     }
     hits = matched.slice(0, LIMIT);
-    stats = { genomes: countBy(matched, (g) => g.genome), types: countBy(matched, (g) => g.type) };
+    stats = { genomes: countBy(matched, (g) => g.genome), types: countBy(matched, (g) => g.type), lengths: binLengths(matched) };
     getMatches = async () => matched;
   } else {
     const all = [];
@@ -263,7 +345,7 @@ async function exportTable(sep, ext) {
   $("#status").textContent = "Preparing export…";
   try {
     const genes = await getMatches();
-    download(toDelimited(genes, sep), fileName($("#export-name").value, $("#q").value, ext), "text/plain");
+    download(ext === "bed" ? toBed(genes) : toDelimited(genes, sep), fileName($("#export-name").value, $("#q").value, ext), "text/plain");
   } finally {
     $("#status").textContent = status;
   }
@@ -300,12 +382,20 @@ async function init() {
   $("#all").addEventListener("change", onQuery);
   $("#export-tsv").addEventListener("click", () => exportTable("\t", "tsv"));
   $("#export-csv").addEventListener("click", () => exportTable(",", "csv"));
+  $("#export-bed").addEventListener("click", () => exportTable("\t", "bed"));
+  $("#more").addEventListener("click", () => {
+    shown += LIMIT;
+    rerender().catch((e) => ($("#status").textContent = `Could not load more rows: ${e.message}`));
+  });
+  for (const th of document.querySelectorAll("th[data-sort]")) th.addEventListener("click", () => setSort(th.dataset.sort));
   const params = new URLSearchParams(location.search);
   const initial = params.get("q");
   if (initial) {
     $("#q").value = initial;
     $("#all").checked = params.get("all") === "1";
     onQuery();
+  } else {
+    showOverview();
   }
 }
 

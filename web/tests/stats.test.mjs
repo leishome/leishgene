@@ -17,3 +17,12 @@ test("withOther keeps the top n and folds the rest", () => {
   assert.deepEqual(withOther(entries, 2), { shown: [["a", 5], ["b", 4]], other: { count: 5, groups: 2 } });
   assert.deepEqual(withOther(entries, 4), { shown: entries, other: null });
 });
+
+import { binLengths } from "../stats.js";
+
+test("binLengths counts gene lengths into fixed bins, keeping empty bins", () => {
+  const genes = [{ start: 1, end: 100 }, { start: 1, end: 499 }, { start: 1, end: 500 }, { start: 1, end: 3000 }, { start: 1, end: 20000 }, {}];
+  assert.deepEqual(binLengths(genes), [
+    ["< 500 bp", 2], ["500 bp – 1 kb", 1], ["1 – 2 kb", 0], ["2 – 4 kb", 1], ["4 – 8 kb", 0], ["≥ 8 kb", 1],
+  ]);
+});

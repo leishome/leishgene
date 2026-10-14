@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 import logging
 from pathlib import Path
 
@@ -24,7 +25,17 @@ def test_writes_shard_manifest_names(tmp_path):
     manifest = build_index(tmp_path, [src("G1", "ncbi.gff", FIX / "ncbi.gff")])
     assert manifest == load(tmp_path / "manifest.json")
     assert manifest == [
-        {"genome": "G1", "species": "Leishmania x", "strain": "S", "aliases": ["al"], "genes": 3, "status": "ok"}
+        {
+            "genome": "G1",
+            "species": "Leishmania x",
+            "strain": "S",
+            "aliases": ["al"],
+            "gff": "ncbi.gff",
+            "source": "leishref catalog",
+            "genes": 3,
+            "types": manifest[0]["types"],
+            "status": "ok",
+        }
     ]
     shard = load(tmp_path / "G1.json")
     assert {g["id"] for g in shard} == {"LMJF_01_0010", "LMJF_01_0020", "LMJF_tRNA1"}
@@ -66,3 +77,19 @@ def test_seqid_map_applied_to_shard(tmp_path):
     build_index(tmp_path, [source])
     seqids = {g["seqid"] for g in load(tmp_path / "G1.json")}
     assert "CP022616.1" in seqids and "1" not in seqids
+
+
+def test_manifest_counts_genes_by_type(tmp_path):
+    manifest = build_index(tmp_path, [src("G1", "ncbi.gff", FIX / "ncbi.gff")])
+    assert manifest[0]["types"] == dict(Counter(g["type"] for g in load(tmp_path / "G1.json")))
+    assert sum(manifest[0]["types"].values()) == manifest[0]["genes"] == 3
+
+
+def test_manifest_records_gff_and_source(tmp_path):
+    local = src("G2", "ld1s.gff", FIX / "ld1s.gff")
+    local.override = True
+    manifest = build_index(tmp_path, [src("G1", "ncbi.gff", FIX / "ncbi.gff"), local])
+    assert [(e["gff"], e["source"]) for e in manifest] == [
+        ("ncbi.gff", "leishref catalog"),
+        ("ld1s.gff", "local override"),
+    ]

@@ -13,7 +13,7 @@ from leishgene.export import SiteIndexError, export_site, load_manifest
 from leishgene.index import MissingGffError, build_index
 from leishgene.search import QueryError, parse_query
 from leishgene.sources import list_sources, load_overrides
-from leishgene.table import DELIMITERS, write_table
+from leishgene.table import OUTPUT_SUFFIXES, write_table
 
 DEFAULT_INDEX = Path.home() / ".cache" / "leishgene"
 DEFAULT_OVERRIDES = Path("data/extra/gff_overrides.yaml")
@@ -70,7 +70,7 @@ def _load_manifest(index_dir):
     "-o",
     "--output",
     type=click.Path(path_type=Path),
-    help="Also write every match (not only --limit rows) to a .tsv or .csv file",
+    help="Also write every match (not only --limit rows) to a .tsv, .csv or .bed file",
 )
 def search(query, index_dir, limit, output):
     """Find genes matching QUERY (words are AND-ed; `*` glob, `/regex/`, `field:value`, "phrases")."""
@@ -81,8 +81,8 @@ def search(query, index_dir, limit, output):
     if not parsed.terms:
         click.echo("Empty query: nothing to search.")
         return
-    if output is not None and output.suffix not in DELIMITERS:
-        raise click.UsageError(f"--output must end in .tsv or .csv, not {output.suffix or output.name!r}")
+    if output is not None and output.suffix not in OUTPUT_SUFFIXES:
+        raise click.UsageError(f"--output must end in .tsv, .csv or .bed, not {output.suffix or output.name!r}")
     manifest = _load_manifest(index_dir)
     hits, total, matched = [], 0, []
     for entry in manifest:

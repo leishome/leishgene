@@ -39,3 +39,15 @@ test("fileName uses the typed name and the button extension", () => {
 test("fileName ignores a name that sanitises to nothing", () => {
   assert.equal(fileName("///", "kinase", "tsv"), "leishgene_kinase.tsv");
 });
+
+import { toBed } from "../export.js";
+
+test("toBed writes 0-based starts, the id as name and a dot for unknown strand", () => {
+  const genes = [{ seqid: "c1", start: 5, end: 90, id: "g 1", strand: "-" }, { seqid: "c2", start: 1, end: 2, id: "g2" }];
+  assert.equal(toBed(genes), "c1\t4\t90\tg_1\t0\t-\nc2\t0\t2\tg2\t0\t.\n");
+});
+
+test("fileName replaces a .bed extension too", () => {
+  assert.equal(fileName("hits.bed", "k", "tsv"), "hits.tsv");
+  assert.equal(fileName("hits", "k", "bed"), "hits.bed");
+});
